@@ -1,0 +1,252 @@
+/* Colours, radii and shadows come from tokens.css, generated from design-tokens.json. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  height: 73px;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo img {
+  height: 26px;
+  width: auto;
+}
+
+.badge {
+  background: var(--color-tint-200);
+  color: var(--color-brand-deep);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.phone {
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+main {
+  flex: 1;
+  padding: 48px 16px 64px;
+  background:
+    radial-gradient(ellipse 90% 60% at 80% 20%, #c25a9e 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 10% 80%, #9c2775 0%, transparent 60%),
+    #a82d80;
+}
+
+h1 {
+  color: var(--color-surface);
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  max-width: 480px;
+  margin: 0 auto 16px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+.row dt {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.row dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.row dd.brand {
+  color: var(--color-brand-bright);
+}
+
+label {
+  display: block;
+  color: var(--color-muted);
+  margin-bottom: 6px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-field);
+  font: inherit;
+  font-size: 15px;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgb(184 59 140 / 0.25);
+}
+
+.expiry {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 12px;
+}
+
+button {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand);
+  color: var(--color-surface);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--color-brand-hover);
+}
+
+.alert {
+  background: rgb(220 53 69 / 0.08);
+  color: var(--color-danger);
+  border-radius: var(--radius-field);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.status {
+  text-align: center;
+  padding: 8px 0 24px;
+}
+
+.status .pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  color: var(--color-surface);
+  margin-bottom: 16px;
+}
+
+.pill.success {
+  background: var(--color-success);
+}
+
+.pill.failed,
+.pill.error {
+  background: var(--color-danger);
+}
+
+.pill.server_error,
+.pill.new,
+.pill.returned {
+  background: var(--color-muted);
+}
+
+.hint {
+  max-width: 480px;
+  margin: 24px auto 0;
+  color: var(--color-tint-200);
+  font-size: 13px;
+}
+
+.hint summary {
+  cursor: pointer;
+  color: var(--color-surface);
+}
+
+.hint table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  background: rgb(255 255 255 / 0.08);
+  border-radius: var(--radius-field);
+}
+
+.hint td {
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.hint td:last-child {
+  font-family: inherit;
+  text-align: right;
+}
+
+footer {
+  background: var(--color-ink);
+  color: var(--color-surface);
+  height: 55px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+}
+
+footer a {
+  color: var(--color-surface);
+  text-decoration: none;
+  margin-left: 24px;
+}
+
+@media (max-width: 560px) {
+  header,
+  footer {
+    padding: 0 16px;
+  }
+
+  footer {
+    font-size: 12px;
+  }
+
+  footer a {
+    margin-left: 12px;
+  }
+}

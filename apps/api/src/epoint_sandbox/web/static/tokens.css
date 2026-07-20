@@ -1,0 +1,38 @@
+/* Generated from design-tokens.json. Run `bun run tokens` to update. */
+
+:root {
+  --color-brand: #b83b8c;
+  --color-brand-bright: #c54697;
+  --color-brand-deep: #620046;
+  --color-brand-mid: #932f71;
+  --color-brand-hover: #9b3276;
+  --color-tint-50: #fcf7fb;
+  --color-tint-100: #ffebf4;
+  --color-tint-200: #ffd8eb;
+  --color-ink: #000000;
+  --color-body: #4a4a4a;
+  --color-muted: #645c5f;
+  --color-subtle: #9c9c9c;
+  --color-line: #ebe9e9;
+  --color-line-strong: #dedede;
+  --color-surface: #ffffff;
+  --color-canvas: #fcfcfc;
+  --color-surface-alt: #f7f7f7;
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+
+  --radius-field: 8px;
+  --radius-card: 9px;
+  --radius-card-lg: 16px;
+  --radius-pill: 9999px;
+
+  --shadow-card: 0 16px 32px rgb(0 0 0 / 0.08);
+  --shadow-dropdown: 0 32px 64px rgb(0 0 0 / 0.08);
+  --shadow-popover: 0 4px 12px rgb(0 0 0 / 0.15);
+
+  --font-sans: 'Figtree Variable', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --breakpoint-lg: 992px;
+}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t.title }}</h1>
+
+<div class="card">
+  <div class="status">
+    <span class="pill {{ transaction.status.value }}">{{ transaction.status.value }}</span>
+    <div>{{ transaction.message }}</div>
+  </div>
+
+  <dl>
+    <div class="row"><dt>{{ t.amount }}:</dt><dd>{{ '%.2f'|format(transaction.amount) }} {{ transaction.currency }}</dd></div>
+    <div class="row"><dt>Transaction:</dt><dd>{{ transaction.transaction_id }}</dd></div>
+    <div class="row"><dt>Order:</dt><dd>{{ transaction.order_id }}</dd></div>
+    {% if transaction.bank_code %}<div class="row"><dt>Bank code:</dt><dd>{{ transaction.bank_code }}</dd></div>{% endif %}
+    {% if transaction.rrn %}<div class="row"><dt>RRN:</dt><dd>{{ transaction.rrn }}</dd></div>{% endif %}
+    {% if transaction.card_mask %}<div class="row"><dt>Card:</dt><dd>{{ transaction.card_mask }}</dd></div>{% endif %}
+    <div class="row"><dt>Trace:</dt><dd>{{ transaction.trace_id }}</dd></div>
+  </dl>
+</div>
+{% endblock %}

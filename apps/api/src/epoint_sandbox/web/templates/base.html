@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ transaction.language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ t.title }}</title>
+<link rel="icon" type="image/x-icon" href="/checkout-assets/favicon.ico">
+<link rel="stylesheet" href="/checkout-assets/tokens.css">
+<link rel="stylesheet" href="/checkout-assets/checkout.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><img src="/checkout-assets/logo.svg" alt="Epoint"><span class="badge">SANDBOX</span></a>
+  <div class="phone">{{ merchant.contact_phone or '' }}</div>
+</header>
+<main>
+  {% block content %}{% endblock %}
+</main>
+<footer>
+  <span>Epoint Sandbox. Not affiliated with Epoint.</span>
+  <nav><a href="/">Dashboard</a><a href="/docs">API reference</a></nav>
+</footer>
+</body>
+</html>

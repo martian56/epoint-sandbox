@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t.title }}</h1>
+
+<dl class="card">
+  <div class="row"><dt>{{ t.amount }}:</dt><dd>{{ '%.2f'|format(transaction.amount) }} {{ transaction.currency }}</dd></div>
+  <div class="row"><dt>{{ t.merchant }}:</dt><dd class="brand">{{ merchant.name }}</dd></div>
+  {% if merchant.tin %}<div class="row"><dt>{{ t.tin }}:</dt><dd>{{ merchant.tin }}</dd></div>{% endif %}
+  {% if merchant.contact_phone %}<div class="row"><dt>{{ t.phone }}:</dt><dd>{{ merchant.contact_phone }}</dd></div>{% endif %}
+</dl>
+
+<form class="card" method="post" autocomplete="off">
+  {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+
+  <div class="field">
+    <label for="card_holder">{{ t.holder }}</label>
+    <input id="card_holder" name="card_holder" value="Sandbox Tester">
+  </div>
+
+  <div class="field">
+    <label for="card_number">{{ t.number }}</label>
+    <input id="card_number" name="card_number" inputmode="numeric"
+           placeholder="0000 0000 0000 0000" value="4111 1111 1111 1111" required>
+  </div>
+
+  <div class="expiry">
+    <div>
+      <label for="month">{{ t.month }}</label>
+      <input id="month" name="month" inputmode="numeric" maxlength="2" placeholder="MM" value="12">
+    </div>
+    <div>
+      <label for="year">{{ t.year }}</label>
+      <input id="year" name="year" inputmode="numeric" maxlength="2" placeholder="YY" value="30">
+    </div>
+    <div>
+      <label for="cvv">{{ t.cvv }}</label>
+      <input id="cvv" name="cvv" inputmode="numeric" maxlength="3" placeholder="123" value="123">
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:24px">
+    <button type="submit">{{ t.submit }}</button>
+  </div>
+</form>
+
+<details class="hint">
+  <summary>{{ t.testCards }}</summary>
+  <table>
+    {% for c in cards %}
+    <tr><td>{{ c.number }}</td><td>{{ c.outcome }}</td></tr>
+    {% endfor %}
+  </table>
+</details>
+{% endblock %}
