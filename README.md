@@ -9,9 +9,6 @@ inteqrasiyanızı qurub test edə bilərsiniz.
 docker run -p 8181:8181 ghcr.io/martian56/epoint-sandbox
 ```
 
-Postgres konteynerin içindədir, migration-lar başlanğıcda özü işləyir. Təxminən 15 saniyəyə hazır
-olur.
-
 İnteqrasiyanızı bura yönləndirin:
 
 ```
@@ -229,7 +226,7 @@ dashboard login tələb edir.
 ```yaml
 services:
   epoint-sandbox:
-    image: ghcr.io/martian56/epoint-sandbox:0.2.0
+    image: ghcr.io/martian56/epoint-sandbox:latest
     environment:
       EPOINT_ADMIN_EMAIL: admin@example.com
       EPOINT_ADMIN_PASSWORD: ${EPOINT_ADMIN_PASSWORD}
@@ -285,7 +282,7 @@ Admin parolu təyin olunmayıbsa, heç bir autentifikasiya yoxdur: dashboard aç
 Sandbox-u heç bir halda açıq internetə çıxarmayın. Real pul saxlamır, amma callback URL-lərinizi və
 staging host adlarınızı hər kəsə göstərəcək.
 
-## Töhfə vermək
+## Contribution
 
 [bun](https://bun.sh) və [uv](https://docs.astral.sh/uv/) lazımdır.
 
@@ -303,7 +300,7 @@ bun run dev:web    # dashboard 5173-də
 
 ## Epoint ilə bağlı deyil
 
-Bu, epoint.az ilə inteqrasiya edən developer-lər üçün müstəqil alətdir. Brendi yox, API
-kontraktını təqlid edir və real ödəniş emal etmir.
+Bu Sandbox, epoint.az ilə inteqrasiya edən developer-lər üçün bir alətdir. API kontraktını təqlid
+edir və real ödəniş emal etmir.
 
 MIT lisenziyası.

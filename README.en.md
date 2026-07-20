@@ -9,8 +9,6 @@ test an integration without a merchant account.
 docker run -p 8181:8181 ghcr.io/martian56/epoint-sandbox
 ```
 
-Postgres is bundled and migrations run on boot. Ready in about 15 seconds.
-
 Point your integration at it:
 
 ```
@@ -225,7 +223,7 @@ the dashboard requires a login.
 ```yaml
 services:
   epoint-sandbox:
-    image: ghcr.io/martian56/epoint-sandbox:0.2.0
+    image: ghcr.io/martian56/epoint-sandbox:latest
     environment:
       EPOINT_ADMIN_EMAIL: admin@example.com
       EPOINT_ADMIN_PASSWORD: ${EPOINT_ADMIN_PASSWORD}
@@ -299,7 +297,6 @@ editing `design-tokens.json`.
 
 ## Not affiliated with Epoint
 
-An independent tool for developers integrating with epoint.az. It imitates the API contract, not
-the brand, and processes no real payments.
+An independent tool for developers integrating with epoint.az. It imitates the API contract and processes no real payments.
 
 MIT licensed.
