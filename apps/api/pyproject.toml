@@ -1,6 +1,6 @@
 [project]
 name = "epoint-sandbox-api"
-version = "0.2.0"
+version = "0.2.1"
 description = "Local sandbox for the epoint.az payment gateway"
 requires-python = ">=3.12"
 dependencies = [
