@@ -30,6 +30,10 @@ STRINGS = {
         "submit": "Təsdiq",
         "invalid": "Kart məlumatları yanlışdır",
         "testCards": "Test kartları",
+        "applePay": "Apple Pay ilə ödə",
+        "googlePay": "Google Pay ilə ödə",
+        "walletCard": "Cüzdandakı kart",
+        "walletNote": "Kart seçimi yalnız sandbox-dadır. Real cihaz kartı özü seçir.",
     },
     "en": {
         "title": "Payment details",
@@ -45,6 +49,10 @@ STRINGS = {
         "submit": "Confirm",
         "invalid": "Card details are invalid",
         "testCards": "Test cards",
+        "applePay": "Pay with Apple Pay",
+        "googlePay": "Pay with Google Pay",
+        "walletCard": "Card in the wallet",
+        "walletNote": "Choosing the card is sandbox only. A real device picks it for you.",
     },
     "ru": {
         "title": "Детали платежа",
@@ -60,6 +68,10 @@ STRINGS = {
         "submit": "Подтвердить",
         "invalid": "Неверные данные карты",
         "testCards": "Тестовые карты",
+        "applePay": "Оплатить через Apple Pay",
+        "googlePay": "Оплатить через Google Pay",
+        "walletCard": "Карта в кошельке",
+        "walletNote": "Выбор карты есть только в песочнице. Реальное устройство выбирает само.",
     },
 }
 
@@ -107,9 +119,57 @@ def _settle_card(
     card.status = CardStatus.ACTIVE if approved else CardStatus.REJECTED
 
 
+def _settle(
+    session: SessionDep,
+    transaction: Transaction,
+    digits: str,
+    holder: str = "",
+    month: str = "",
+    year: str = "",
+) -> magic_cards.CardOutcome:
+    """Take the payment. Shared by the card form and the wallet widget."""
+    outcome = magic_cards.resolve(digits)
+
+    transaction.card_mask = magic_cards.mask(digits)
+    transaction.card_name = holder or None
+    transaction.bank_transaction = ids.bank_transaction_id()
+    transaction.bank_code = outcome.bank_code or None
+    transaction.message = outcome.message
+    transaction.operation_code = OperationCode.PAYMENT.value
+    transaction.paid_at = datetime.now(UTC)
+
+    if outcome.timeout:
+        transaction.status = TransactionStatus.SERVER_ERROR
+    elif outcome.approved:
+        transaction.status = TransactionStatus.SUCCESS
+        transaction.rrn = ids.rrn()
+    else:
+        transaction.status = TransactionStatus.FAILED
+
+    _settle_card(session, transaction, digits, holder, month, year, approved=outcome.approved)
+
+    # A pre-auth reserves only. Money moves on capture.
+    if outcome.approved and transaction.amount > 0 and transaction.endpoint != "pre-auth-request":
+        settlement.settle_payment(session, transaction)
+
+    session.flush()
+
+    if not outcome.timeout:
+        callbacks.deliver(session, transaction)
+
+    session.commit()
+    return outcome
+
+
 @router.get("/{token}", response_class=HTMLResponse)
-async def show(request: Request, session: SessionDep, token: str) -> HTMLResponse:
+async def show(request: Request, session: SessionDep, token: str, widget: int = 0) -> HTMLResponse:
     transaction = _load(session, token)
+
+    # Apple Pay and Google Pay share one widget, embedded in an iframe by the merchant.
+    if widget:
+        template = "widget.html" if transaction.status is TransactionStatus.NEW else "settled.html"
+        return templates.TemplateResponse(request, template, _context(transaction))
+
     if transaction.status is not TransactionStatus.NEW:
         return templates.TemplateResponse(request, "result.html", _context(transaction))
     return templates.TemplateResponse(request, "checkout.html", _context(transaction))
@@ -134,36 +194,7 @@ async def pay(
         context = _context(transaction, error=str(STRINGS[transaction.language]["invalid"]))
         return templates.TemplateResponse(request, "checkout.html", context, status_code=400)
 
-    outcome = magic_cards.resolve(digits)
-
-    transaction.card_mask = magic_cards.mask(digits)
-    transaction.card_name = card_holder or None
-    transaction.bank_transaction = ids.bank_transaction_id()
-    transaction.bank_code = outcome.bank_code or None
-    transaction.message = outcome.message
-    transaction.operation_code = OperationCode.PAYMENT.value
-    transaction.paid_at = datetime.now(UTC)
-
-    if outcome.timeout:
-        transaction.status = TransactionStatus.SERVER_ERROR
-    elif outcome.approved:
-        transaction.status = TransactionStatus.SUCCESS
-        transaction.rrn = ids.rrn()
-    else:
-        transaction.status = TransactionStatus.FAILED
-
-    _settle_card(session, transaction, digits, card_holder, month, year, approved=outcome.approved)
-
-    # A pre-auth reserves only. Money moves on capture.
-    if outcome.approved and transaction.amount > 0 and transaction.endpoint != "pre-auth-request":
-        settlement.settle_payment(session, transaction)
-
-    session.flush()
-
-    if not outcome.timeout:
-        callbacks.deliver(session, transaction)
-
-    session.commit()
+    outcome = _settle(session, transaction, digits, card_holder, month, year)
 
     redirect = (
         transaction.success_redirect_url if outcome.approved else transaction.error_redirect_url
@@ -171,3 +202,22 @@ async def pay(
     if redirect:
         return RedirectResponse(redirect, status_code=303)
     return templates.TemplateResponse(request, "result.html", _context(transaction))
+
+
+@router.post("/{token}/widget", response_class=HTMLResponse)
+async def pay_with_wallet(
+    request: Request,
+    session: SessionDep,
+    token: str,
+    wallet: Annotated[str, Form()],
+    card_number: Annotated[str, Form()] = magic_cards.SUCCESS_CARD,
+) -> HTMLResponse:
+    """Settle from inside the iframe and post the result to the parent page.
+
+    Production never redirects here, so neither does this.
+    """
+    transaction = _load(session, token)
+    if transaction.status is TransactionStatus.NEW:
+        _settle(session, transaction, magic_cards.normalize(card_number), holder=wallet)
+
+    return templates.TemplateResponse(request, "settled.html", _context(transaction))
