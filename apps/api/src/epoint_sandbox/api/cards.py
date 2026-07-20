@@ -176,7 +176,7 @@ async def execute_pay(
     signed: SignedRequestDep,
     session: SessionDep,
 ) -> dict[str, Any]:
-    signed.require("card_id", "order_id", "amount", "currency")
+    signed.require("language", "card_id", "order_id", "amount", "currency")
     card = _load_card(session, signed)
     trace_id = _trace(request)
     transaction = _charge_saved_card(
@@ -191,7 +191,9 @@ async def split_execute_pay(
     signed: SignedRequestDep,
     session: SessionDep,
 ) -> dict[str, Any]:
-    signed.require("card_id", "order_id", "amount", "currency", "split_user", "split_amount")
+    signed.require(
+        "language", "card_id", "order_id", "amount", "currency", "split_user", "split_amount"
+    )
     card = _load_card(session, signed)
     trace_id = _trace(request)
 
