@@ -249,3 +249,126 @@ def test_error_bodies_carry_only_epoint_fields(client, merchant):
     body = client.post("/api/1/request", data={"data": data, "signature": signature}).json()
 
     assert set(body) <= {"status", "message", "code", "trace_id"}
+
+
+# Fields the docs list that the sandbox cannot produce at this point in the flow.
+WITHHELD: dict[str, set[str]] = {
+    # Docs omit `transaction` here where every sibling includes it. Withheld until confirmed.
+    "/api/1/payment-change-sum": {"transaction"},
+    # The documented "response" carries rrn and operation_code 200, which only exist once the
+    # customer has paid. It reads as the callback payload, mislabelled. Needs a production capture.
+    "/api/1/card-registration-with-pay": {
+        "amount",
+        "bank_response",
+        "bank_transaction",
+        "card_mask",
+        "card_name",
+        "code",
+        "operation_code",
+        "order_id",
+        "other_attr",
+        "rrn",
+    },
+}
+
+
+def assert_documented_fields_present(path: str, body: dict) -> None:
+    """The other direction: a documented field the sandbox omits reads as undefined."""
+    missing = (
+        set(DOCUMENTED_RESPONSE_FIELDS.get(path, set())) - set(body) - WITHHELD.get(path, set())
+    )
+    assert not missing, (
+        f"{path} omits documented field(s) {sorted(missing)}. "
+        "An integration reading them gets undefined here and a value in production."
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/api/1/request",
+        "/api/1/payment-request",
+        "/api/1/amex-request",
+        "/api/1/payment-change-sum",
+        "/api/1/pre-auth-request",
+    ],
+)
+def test_payment_family_returns_every_documented_field(client, merchant, path):
+    body = call(client, merchant, path, {**PAYMENT, "order_id": f"p{path[-7:]}"})
+    assert_documented_fields_present(path, body)
+
+
+def test_split_request_returns_every_documented_field(client, merchants):
+    body = call(
+        client,
+        merchants[0],
+        "/api/1/split-request",
+        {
+            **PAYMENT,
+            "order_id": "p-split",
+            "split_user": merchants[1].public_key,
+            "split_amount": "10.00",
+        },
+    )
+    assert_documented_fields_present("/api/1/split-request", body)
+
+
+def test_reverse_returns_every_documented_field(client, merchant):
+    body = call(client, merchant, "/api/1/request", {**PAYMENT, "order_id": "p-rev"})
+    pay_checkout(client, token_of(body))
+    reversed_body = call(
+        client,
+        merchant,
+        "/api/1/reverse",
+        {"language": "en", "transaction": body["transaction"], "currency": "AZN"},
+    )
+    assert_documented_fields_present("/api/1/reverse", reversed_body)
+
+
+def test_wallet_and_installment_return_every_documented_field(client, merchant):
+    wallet = call(
+        client,
+        merchant,
+        "/api/1/wallet/payment",
+        {**PAYMENT, "order_id": "p-wallet", "wallet_id": "wallet_epul"},
+    )
+    assert_documented_fields_present("/api/1/wallet/payment", wallet)
+
+    installment = call(
+        client,
+        merchant,
+        "/api/1/installment-request",
+        {**PAYMENT, "order_id": "p-inst", "installment_card_id": "1", "installment_month": 3},
+    )
+    assert_documented_fields_present("/api/1/installment-request", installment)
+
+
+INVOICE = {
+    "sum": "25.00",
+    "display": 1,
+    "save_as_template": 0,
+    "period_from": "2026-01-01",
+    "period_to": "2026-12-31",
+    "phone": "+994501234567",
+    "email": "buyer@example.com",
+}
+
+
+def test_invoice_endpoints_return_every_documented_field(client, merchant):
+    created = call(client, merchant, "/api/1/invoices/create", INVOICE)
+    assert_documented_fields_present("/api/1/invoices/create", created)
+
+    invoice_id = created["id"]
+    for path, extra in [
+        ("/api/1/invoices/view", {"id": invoice_id}),
+        ("/api/1/invoices/list", {}),
+        ("/api/1/invoices/send-sms", {"id": invoice_id, "phone": "+994501234567"}),
+        ("/api/1/invoices/send-email", {"id": invoice_id, "email": "buyer@example.com"}),
+    ]:
+        assert_documented_fields_present(path, call(client, merchant, path, extra))
+
+
+def test_withheld_fields_are_recorded_as_unverified():
+    """Withholding is only defensible if the gap is declared."""
+    for path in WITHHELD:
+        assert path in UNVERIFIED, f"{path} withholds documented fields without saying why"
