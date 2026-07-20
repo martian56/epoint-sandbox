@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from epoint_sandbox import __version__
 from epoint_sandbox.api.auth import router as auth_router
 from epoint_sandbox.api.b2b import router as b2b_router
 from epoint_sandbox.api.cards import router as cards_router
@@ -39,7 +40,7 @@ async def lifespan(app: FastAPI) -> Any:
 
 app = FastAPI(
     title="epoint sandbox",
-    version="0.1.0",
+    version=__version__,
     description="Local drop-in replacement for the epoint.az payment gateway",
     lifespan=lifespan,
 )
