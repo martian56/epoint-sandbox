@@ -1,3 +1,9 @@
+export interface SessionState {
+  auth_required: boolean
+  authenticated: boolean
+  email: string | null
+}
+
 export type TransactionStatus = 'new' | 'success' | 'failed' | 'error' | 'returned' | 'server_error'
 
 export type CallbackStatus = 'pending' | 'delivered' | 'failed' | 'dropped'
