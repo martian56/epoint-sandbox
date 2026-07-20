@@ -1,87 +1,90 @@
+**Azərbaycanca** · [English](README.en.md)
+
 # Epoint Sandbox
 
-A local replacement for the [epoint.az](https://epoint.az) payment gateway, so you can build and
-test an integration without a merchant account.
+[epoint.az](https://epoint.az) ödəniş gateway-inin lokal versiyası. Merchant hesabı olmadan
+inteqrasiyanızı qurub test edə bilərsiniz.
 
 ```bash
 docker run -p 8181:8181 ghcr.io/martian56/epoint-sandbox
 ```
 
-Postgres is bundled and migrations run on boot. Ready in about 15 seconds.
+Postgres konteynerin içindədir, migration-lar başlanğıcda özü işləyir. Təxminən 15 saniyəyə hazır
+olur.
 
-Point your integration at it:
+İnteqrasiyanızı bura yönləndirin:
 
 ```
 https://epoint.az/api/1/request   ->   http://localhost:8181/api/1/request
 ```
 
-Every path under `/api/1/` matches production, so nothing else changes.
+`/api/1/` altındakı bütün path-lər production ilə eynidir, ona görə başqa heç nə dəyişmir.
 
-![The sandbox dashboard, a copy of the epoint merchant cabinet](images/dashboard.png)
+![Sandbox dashboard-u, epoint kabinetinin surəti](images/dashboard.png)
 
 | URL | |
 |---|---|
 | `http://localhost:8181` | Dashboard |
-| `http://localhost:8181/api/1/*` | Epoint-compatible API |
-| `http://localhost:8181/checkout/{token}` | Hosted checkout page |
-| `http://localhost:8181/docs` | OpenAPI schema |
+| `http://localhost:8181/api/1/*` | Epoint ilə uyğun API |
+| `http://localhost:8181/checkout/{token}` | Ödəniş səhifəsi |
+| `http://localhost:8181/docs` | OpenAPI sxemi |
 
-## What you get
+## İmkanlar
 
-**Every payment lands somewhere you can see it.** The dashboard is a copy of epoint's, so what you
-learn here transfers. Transactions, a real balance ledger, saved cards, invoices, bank transfers,
-plus a request log and callback inspector that production has no equivalent for.
+**Hər ödəniş göz önündədir.** Dashboard epoint-in kabinetinin surətidir, ona görə burada
+öyrəndikləriniz prod-da da işə yarayır. Əməliyyatlar, real balans tarixçəsi, yadda saxlanmış
+kartlar, invoice-lar, bank köçürmələri, üstəlik production-da qarşılığı olmayan request log və
+callback izləyicisi.
 
-**Failures on demand.** Epoint publishes no test cards, so the sandbox defines its own. The last
-three digits are the bank response code, so reading the number tells you what will happen. Want to
-test the declined path, or a gateway timeout where no callback ever arrives? Type a different
-number.
+**Səhvləri özünüz yaradırsınız.** Epoint test kartları paylaşmır, ona görə sandbox öz kartlarını
+təyin edir. Son üç rəqəm bank cavab kodudur, yəni nömrəyə baxıb nəticəni bilirsiniz. Uğursuz
+ödənişi, ya da callback-in heç vaxt gəlmədiyi timeout halını yoxlamaq üçün sadəcə başqa nömrə
+yazın.
 
-![The test card catalogue](images/test-cards.png)
+![Test kartlarının siyahısı](images/test-cards.png)
 
-**The signature mistake, named.** Epoint signs with `base64(sha1_raw(private_key + data +
-private_key))`, and the digest has to be the raw 20 bytes rather than the hex string. That single
-detail accounts for most failed integrations. Paste a failing pair in and the tool tells you which
-mistake you made.
+**İmza səhvi birbaşa deyilir.** Epoint `base64(sha1_raw(private_key + data + private_key))` ilə
+imzalayır və digest hex string yox, xam 20 bayt olmalıdır. İnteqrasiyaların əksəriyyəti məhz burada
+uğursuz olur. İşləməyən `data` və `signature` cütünü yapışdırın, alət hansı səhvi etdiyinizi deyir.
 
-![The signature tool diagnosing a hex digest mistake](images/signature-tool.png)
+![İmza aləti hex digest səhvini tapır](images/signature-tool.png)
 
-**Callbacks you can actually watch.** The sandbox posts to your `result_url` with the same signed
-payload production sends. Every attempt is recorded with the decoded payload, the raw `data`, the
-signature and your own response, so a webhook that quietly 500s is visible rather than mysterious.
+**Callback-ləri həqiqətən görürsünüz.** Sandbox sizin `result_url` ünvanınıza production-un
+göndərdiyi eyni imzalanmış payload-u göndərir. Hər cəhd qeyd olunur: açılmış payload, xam `data`,
+imza və sizin öz cavabınız. Beləcə səssizcə 500 qaytaran webhook gizli qalmır.
 
-![A callback attempt with its decoded payload and signature](images/callbacks.png)
+![Callback cəhdi, açılmış payload və imza ilə](images/callbacks.png)
 
-**Keys and grants you control.** Rotate a private key and existing signatures stop verifying,
-exactly as in production. AMEX, Apple Pay, Google Pay, installments, wallets and B2B are off by
-default, because epoint grants them per merchant on request, so an integration meets the same
-refusal here that it would on go-live.
+**Açarlar və icazələr sizdədir.** Private key-i yeniləyin, köhnə imzalar dərhal işləməyi dayandırır,
+tam production-dakı kimi. AMEX, Apple Pay, Google Pay, taksit, wallet və B2B default olaraq
+bağlıdır, çünki epoint bunları hər merchant üçün ayrıca, sorğu əsasında açır. Yəni inteqrasiyanız
+burada da prod-dakı eyni imtina ilə qarşılaşır.
 
-![API management with keys, integration URLs and feature grants](images/api-management.png)
+![API Idarəetmə: açarlar, inteqrasiya linkləri və icazələr](images/api-management.png)
 
-**The hosted checkout page**, which is where your customer actually pays.
+**Ödəniş səhifəsi**, müştərinin əslində ödəniş etdiyi yer.
 
-![The hosted checkout page](images/checkout.png)
+![Ödəniş səhifəsi](images/checkout.png)
 
-**Apple Pay and Google Pay**, served as a widget you embed rather than redirect to, answering with
-a `postMessage` the way production does.
+**Apple Pay və Google Pay**, redirect yox, embed etdiyiniz widget kimi işləyir və nəticəni
+production-dakı kimi `postMessage` ilə qaytarır.
 
-![The wallet widget embedded in a merchant page](images/wallet-widget.png)
+![Merchant səhifəsinə yerləşdirilmiş wallet widget-i](images/wallet-widget.png)
 
-## Local development
+## Lokal iş
 
-Two accounts are seeded, so split payments work immediately:
+İki hesab hazır gəlir, ona görə split ödənişlər dərhal işləyir:
 
 | | Public key | Private key |
 |---|---|---|
 | Sandbox Merchant | `i000000001` | `sandbox_private_key_0000000001` |
 | Split Partner | `i000000002` | `sandbox_private_key_0000000002` |
 
-Or create your own on the **API Management** page: set the website, success, failed and result
-URLs, then copy the key pair. Keys use epoint's formats, `i` plus nine digits and a 24 character
-secret, so anything validating their shape keeps working in production.
+Yaxud **API Idarəetmə** səhifəsində özünüzünkünü yaradın: veb sayt, uğurlu, uğursuz və nəticə
+linklərini yazın, sonra açar cütünü götürün. Açarlar epoint formatındadır, `i` və doqquz rəqəm,
+plus 24 simvolluq secret. Yəni formatı yoxlayan kod prod-da da işləməyə davam edir.
 
-A typical loop:
+Adi iş axını:
 
 ```bash
 docker run -d -p 8181:8181 --name epoint \
@@ -89,8 +92,8 @@ docker run -d -p 8181:8181 --name epoint \
   ghcr.io/martian56/epoint-sandbox
 ```
 
-Point your `result_url` at your own machine. Callbacks originate inside the container, so
-`localhost` there means the container, not you:
+`result_url` ünvanını öz maşınınıza yönləndirin. Callback-lər konteynerin içindən gedir, ona görə
+oradakı `localhost` sizin kompüteriniz yox, konteynerin özüdür:
 
 ```bash
 curl -X PATCH http://localhost:8181/_sandbox/merchants/i000000001 \
@@ -98,33 +101,33 @@ curl -X PATCH http://localhost:8181/_sandbox/merchants/i000000001 \
   -d '{"result_url": "http://host.docker.internal:3000/webhooks/epoint"}'
 ```
 
-Then drive a payment: POST to `/api/1/request`, redirect to the `redirect_url` you get back, pay
-with `4111 1111 1111 1111`, and watch the callback arrive. When something fails, the Request Log
-page has the raw `data`, the signature and whether it verified; the Callbacks page has every
-delivery attempt with your response body.
+Sonra ödənişi işə salın: `/api/1/request` ünvanına POST edin, qayıdan `redirect_url` ünvanına
+yönləndirin, `4111 1111 1111 1111` ilə ödəyin və callback-in gəlişini izləyin. Nəsə alınmasa,
+Request Log səhifəsində xam `data`, imza və imzanın doğrulanıb-doğrulanmadığı var. Callbacks
+səhifəsində isə hər göndərmə cəhdi sizin cavabınızla birlikdə görünür.
 
-There is no login locally. Every restart is a clean database unless you mount a volume.
+Lokalda login yoxdur. Volume qoşmasanız, hər restart-da baza təmiz başlayır.
 
-## Test cards
+## Test kartları
 
-The last three digits are the bank response code.
+Son üç rəqəm bank cavab kodudur.
 
-| Card | Result |
+| Kart | Nəticə |
 |---|---|
-| `4111 1111 1111 1111` | Approved (`000`) |
-| `4000 0000 0000 0116` | Insufficient funds (`116`) |
-| `4000 0000 0000 0101` | Card expired (`101`) |
-| `4000 0000 0000 0102` | Suspected fraud (`102`) |
-| `4000 0000 0000 0209` | Stolen card (`209`) |
-| `4000 0000 0000 3220` | Approved after a 3DS challenge |
-| `4000 0000 0000 9999` | Gateway timeout, no callback sent |
+| `4111 1111 1111 1111` | Uğurlu (`000`) |
+| `4000 0000 0000 0116` | Vəsait kifayət etmir (`116`) |
+| `4000 0000 0000 0101` | Kartın müddəti bitib (`101`) |
+| `4000 0000 0000 0102` | Fırıldaqçılıq şübhəsi (`102`) |
+| `4000 0000 0000 0209` | Oğurlanmış kart (`209`) |
+| `4000 0000 0000 3220` | 3DS təsdiqindən sonra uğurlu |
+| `4000 0000 0000 9999` | Gateway timeout, callback ümumiyyətlə gəlmir |
 
-Any expiry in the future and any CVV work. The full list is at `GET /_sandbox/cards`.
+Gələcək tarixli istənilən müddət və istənilən CVV işləyir. Tam siyahı: `GET /_sandbox/cards`.
 
-## Callbacks
+## Callback-lər
 
-The sandbox posts to your `result_url` with the same `data` and `signature` pair production uses.
-Set it on the API Management page, or through the API:
+Sandbox sizin `result_url` ünvanınıza production-un göndərdiyi eyni `data` və `signature` cütünü
+göndərir. API Idarəetmə səhifəsindən, ya da API ilə təyin edin:
 
 ```bash
 curl -X PATCH http://localhost:8181/_sandbox/merchants/i000000001 \
@@ -132,18 +135,18 @@ curl -X PATCH http://localhost:8181/_sandbox/merchants/i000000001 \
   -d '{"result_url": "http://host.docker.internal:3000/webhooks/epoint"}'
 ```
 
-Callbacks originate inside the container, so `localhost` there is the container, not your machine.
-Use `host.docker.internal`. On Linux that host has to be added:
+Callback-lər konteynerin içindən gedir, ona görə oradakı `localhost` sizin maşınınız deyil.
+`host.docker.internal` istifadə edin. Linux-da bu host-u əlavə etmək lazımdır:
 
 ```bash
 docker run -p 8181:8181 --add-host=host.docker.internal:host-gateway \
   ghcr.io/martian56/epoint-sandbox
 ```
 
-## Signatures
+## İmzalar
 
-Epoint signs with `base64(sha1_raw(private_key + data + private_key))`. The digest has to be the
-raw 20 bytes, not the hex string, which is where most integrations go wrong.
+Epoint `base64(sha1_raw(private_key + data + private_key))` ilə imzalayır. Digest hex string yox,
+xam 20 bayt olmalıdır. İnteqrasiyaların çoxu məhz burada səhv edir.
 
 ```python
 import base64, hashlib
@@ -152,37 +155,38 @@ signature = base64.b64encode(
 ).decode()
 ```
 
-The Signature Tool page takes a failing pair and names the mistake.
+Signature Tool səhifəsi işləməyən cütü götürüb səhvin nə olduğunu deyir.
 
-## Endpoints
+## Endpoint-lər
 
-All 30 documented endpoints are implemented.
+Sənədləşdirilmiş 30 endpoint-in hamısı var.
 
-| Area | Endpoints |
+| Sahə | Endpoint-lər |
 |---|---|
-| Checkout | `request`, `checkout`, `payment-request`, `amex-request`, `payment-change-sum` |
+| Ödəniş | `request`, `checkout`, `payment-request`, `amex-request`, `payment-change-sum` |
 | Split | `split-request`, `split-execute-pay` |
 | Pre-auth | `pre-auth-request`, `pre-auth-complete` |
-| Cards | `card-registration`, `card-registration-with-pay`, `execute-pay`, `get-status-card` |
-| Money | `refund-request` (refund and payout), `reverse` |
+| Kartlar | `card-registration`, `card-registration-with-pay`, `execute-pay`, `get-status-card` |
+| Vəsait | `refund-request` (geri qaytarma və payout), `reverse` |
 | Status | `get-status` |
-| Invoices | `create`, `update`, `view`, `list`, `send-sms`, `send-email` |
-| Installments | `get-installment-request`, `installment-request` |
+| Invoice | `create`, `update`, `view`, `list`, `send-sms`, `send-email` |
+| Taksit | `get-installment-request`, `installment-request` |
 | Wallet | `wallet/status`, `wallet/payment` |
 | Token | `token/widget` |
 | B2B | `b2b/payment`, `b2b/payment/{order_id}` |
 | Health | `heartbeat` |
 
-### Apple Pay and Google Pay
+### Apple Pay və Google Pay
 
-Both run through `token/widget`, which returns a `widget_url` you embed rather than redirect to.
-One widget serves both wallets; the device decides which button it can show.
+İkisi də `token/widget` üzərindən işləyir. Bu endpoint `widget_url` qaytarır, siz onu redirect
+etmirsiniz, embed edirsiniz. Bir widget hər iki wallet-ə xidmət edir, hansı düyməni göstərməyi
+cihaz özü seçir.
 
 ```html
 <iframe src="{widget_url}" width="100%" height="330"></iframe>
 ```
 
-The result arrives as a `postMessage` to the page hosting the iframe, not as a redirect:
+Nəticə redirect kimi yox, iframe-i saxlayan səhifəyə `postMessage` kimi gəlir:
 
 ```js
 window.addEventListener('message', (event) => {
@@ -190,40 +194,42 @@ window.addEventListener('message', (event) => {
 })
 ```
 
-The signed callback to your `result_url` still fires, and it is the one to settle the order on.
-Inside the sandbox widget you can pick which test card the wallet holds, so declines are reachable.
+`result_url` ünvanınıza gedən imzalanmış callback yenə də göndərilir və sifarişi məhz onunla
+bağlamaq lazımdır. Sandbox widget-inin içində wallet-dəki kartı seçə bilirsiniz, ona görə uğursuz
+halları da yoxlamaq mümkündür.
 
-Balances are a real ledger: payments credit, commission and refunds debit, splits move between
-accounts. Invoice SMS and email are captured in the dashboard rather than delivered.
+Balanslar real tarixçədir: ödənişlər balansı artırır, komissiya və geri qaytarmalar azaldır, split
+isə hesablar arasında bölünür. Invoice SMS və email-ləri göndərilmir, dashboard-da saxlanılır.
 
-AMEX, Apple Pay, Google Pay, installments, wallets and B2B are off by default, because epoint
-grants them per merchant on request. Turn them on from API Management.
+AMEX, Apple Pay, Google Pay, taksit, wallet və B2B default olaraq bağlıdır, çünki epoint bunları
+hər merchant üçün ayrıca açır. API Idarəetmə səhifəsindən aça bilərsiniz.
 
-Every response carries `X-Epoint-Sandbox: 1`. Assert its absence in your production smoke tests.
+Hər cavabda `X-Epoint-Sandbox: 1` header-i olur. Production smoke test-lərinizdə bu header-in
+**olmadığını** yoxlayın.
 
-## Configuration
+## Konfiqurasiya
 
-| Variable | |
+| Dəyişən | |
 |---|---|
-| `EPOINT_DATABASE_URL` | Use your own Postgres instead of the bundled one |
-| `EPOINT_PUBLIC_BASE_URL` | Base for the `redirect_url` values handed back to you, default `http://localhost:8181` |
-| `EPOINT_ADMIN_EMAIL` / `EPOINT_ADMIN_PASSWORD` | Set both to require a dashboard login. Unset means open. |
-| `EPOINT_SESSION_TTL_HOURS` | How long a dashboard session lasts, default `12` |
-| `EPOINT_COMMISSION_RATE` | Commission taken on settlement, default `0.03` |
-| `EPOINT_SEED_MERCHANTS` | Set `false` to start with no accounts |
+| `EPOINT_DATABASE_URL` | Daxili Postgres yerinə öz baza serverinizi işlədin |
+| `EPOINT_PUBLIC_BASE_URL` | Qaytarılan `redirect_url` üçün baza ünvan, default `http://localhost:8181` |
+| `EPOINT_ADMIN_EMAIL` / `EPOINT_ADMIN_PASSWORD` | İkisini də təyin etsəniz, dashboard login tələb edir. Boş qalsa, açıqdır. |
+| `EPOINT_SESSION_TTL_HOURS` | Dashboard sessiyasının müddəti, default `12` |
+| `EPOINT_COMMISSION_RATE` | Ödənişdən tutulan komissiya, default `0.03` |
+| `EPOINT_SEED_MERCHANTS` | `false` etsəniz, heç bir hazır hesab olmur |
 
-Bundled data lives at `/var/lib/postgresql/data`. Mount a volume there to keep it between
-containers.
+Daxili bazanın datası `/var/lib/postgresql/data` altındadır. Konteynerlər arasında saxlamaq üçün ora
+volume qoşun.
 
 ## Staging
 
-The same container runs as a shared service next to your staging stack. Set an admin password and
-the dashboard requires a login.
+Eyni konteyner staging mühitinizin yanında ortaq servis kimi işləyir. Admin parolu təyin etsəniz,
+dashboard login tələb edir.
 
 ```yaml
 services:
   epoint-sandbox:
-    image: ghcr.io/martian56/epoint-sandbox:0.1.0
+    image: ghcr.io/martian56/epoint-sandbox:0.2.0
     environment:
       EPOINT_ADMIN_EMAIL: admin@example.com
       EPOINT_ADMIN_PASSWORD: ${EPOINT_ADMIN_PASSWORD}
@@ -232,72 +238,72 @@ services:
     ports: ['8181:8181']
 ```
 
-Three things change compared to local.
+Lokaldan üç fərqi var.
 
-**Your services reach it by container name.** `result_url` becomes
-`http://your-api:3000/webhooks/epoint`, with no `host.docker.internal` involved.
+**Servisləriniz ona konteyner adı ilə çatır.** `result_url`
+`http://your-api:3000/webhooks/epoint` olur, `host.docker.internal` lazım deyil.
 
-**`EPOINT_PUBLIC_BASE_URL` has to be set.** The `redirect_url` the API hands back is built from it.
-Leave it at the default and your checkout redirects will send customers to `localhost`.
+**`EPOINT_PUBLIC_BASE_URL` mütləq təyin olunmalıdır.** API-nin qaytardığı `redirect_url` ondan
+qurulur. Default qalsa, müştəriləriniz `localhost` ünvanına yönlənəcək.
 
-**The seeded keys are generated, not the published ones.** The keys in the table above ship in the
-public image, so a secured instance issues random ones instead. The public keys stay `i000000001`
-and `i000000002` so split payments still work, but the secrets are unique to your deployment. Read
-them from the API Management page after your first login.
+**Hazır hesabların açarları generasiya olunur.** Yuxarıdakı cədvəldəki açarlar public image-in
+içindədir, ona görə parol qoyulmuş instansiya təsadüfi açarlar verir. Public key-lər `i000000001` və
+`i000000002` olaraq qalır ki, split ödənişlər işləməyə davam etsin, amma secret-lər yalnız sizin
+deployment-ə aiddir. İlk login-dən sonra API Idarəetmə səhifəsindən götürün.
 
-That last point matters: the login gate protects the dashboard and `/_sandbox/*`, but `/api/1/*` is
-signature-authenticated only. If it kept the published secrets, anyone who could reach the sandbox
-could sign valid requests and push fake payment callbacks into your staging system.
+Bu vacibdir: login yalnız dashboard-u və `/_sandbox/*` ünvanlarını qoruyur, `/api/1/*` isə ancaq
+imza ilə qorunur. Əgər açarlar public qalsaydı, sandbox-a çıxışı olan hər kəs düzgün imzalanmış
+sorğu göndərib staging sisteminizə saxta ödəniş callback-ləri ata bilərdi.
 
-### Signing in
+### Login
 
-Credentials are read at startup rather than claimed through a first-run screen, so there is no
-window after deploy where an unclaimed instance is waiting to be taken over.
+Məlumatlar ilk açılış ekranından yox, başlanğıcda environment-dən oxunur. Ona görə deploy-dan sonra
+instansiyanın sahibsiz qaldığı və kiminsə onu ələ keçirə biləcəyi bir aralıq yaranmır.
 
-Scripts use the password as a bearer token instead of a session cookie:
+Skriptlər sessiya cookie-si yerinə parolu bearer token kimi işlədir:
 
 ```bash
 curl https://epoint-sandbox.staging.internal/_sandbox/merchants \
   -H "Authorization: Bearer $EPOINT_ADMIN_PASSWORD"
 ```
 
-Sessions last `EPOINT_SESSION_TTL_HOURS`, 12 by default, and are signed with a key derived from the
-credentials, so changing the password signs everyone out.
+Sessiyalar `EPOINT_SESSION_TTL_HOURS` qədər, default 12 saat yaşayır və açarları məlumatlardan
+törəyir, yəni parolu dəyişəndə hamı avtomatik çıxır.
 
-`/_sandbox/health` stays open so container health checks work without credentials.
+`/_sandbox/health` açıq qalır ki, konteyner health check-ləri parolsuz işləsin.
 
-## Security
+## Təhlükəsizlik
 
-`/api/1/*` is never gated by the admin password. It is already signature-authenticated, and
-requiring more would break the promise that only the base URL and keys change between here and
-production. Protect it by keeping the sandbox off untrusted networks, not by adding a second layer.
+`/api/1/*` heç vaxt admin parolu ilə bağlanmır. O onsuz da imza ilə qorunur və üstünə ikinci qat
+əlavə etmək "yalnız base URL və açarlar dəyişir" vədini pozardı. Onu qorumağın yolu sandbox-u
+etibarsız şəbəkələrdən uzaq saxlamaqdır, ikinci qat əlavə etmək yox.
 
-With no admin password set there is no authentication at all: the dashboard is open and
-`GET /_sandbox/merchants` returns private keys in plaintext. The dashboard shows a **No auth** badge
-in the header when it is in that state. Fine on `localhost`, not fine anywhere else.
+Admin parolu təyin olunmayıbsa, heç bir autentifikasiya yoxdur: dashboard açıqdır və
+`GET /_sandbox/merchants` private key-ləri açıq mətnlə qaytarır. Bu halda dashboard-un yuxarısında
+**No auth** nişanı görünür. `localhost` üçün normaldır, başqa yer üçün yox.
 
-Do not expose the sandbox to the public internet either way. It holds no real money, but it will
-show anyone your callback URLs and staging hostnames.
+Sandbox-u heç bir halda açıq internetə çıxarmayın. Real pul saxlamır, amma callback URL-lərinizi və
+staging host adlarınızı hər kəsə göstərəcək.
 
-## Contributing
+## Töhfə vermək
 
-Requires [bun](https://bun.sh) and [uv](https://docs.astral.sh/uv/).
+[bun](https://bun.sh) və [uv](https://docs.astral.sh/uv/) lazımdır.
 
 ```bash
 bun install
 docker compose up -d
 cd apps/api && uv sync && uv run alembic upgrade head && cd ../..
 
-bun run dev:api    # API on 8181
-bun run dev:web    # dashboard on 5173
+bun run dev:api    # API 8181-də
+bun run dev:web    # dashboard 5173-də
 ```
 
-`bun run check` runs everything CI does. `bun run tokens` regenerates the design tokens after
-editing `design-tokens.json`.
+`bun run check` CI-nin etdiyi hər şeyi işlədir. `design-tokens.json` faylını dəyişdikdən sonra
+`bun run tokens` ilə design token-ləri yenidən yaradın.
 
-## Not affiliated with Epoint
+## Epoint ilə bağlı deyil
 
-An independent tool for developers integrating with epoint.az. It imitates the API contract, not
-the brand, and processes no real payments.
+Bu, epoint.az ilə inteqrasiya edən developer-lər üçün müstəqil alətdir. Brendi yox, API
+kontraktını təqlid edir və real ödəniş emal etmir.
 
-MIT licensed.
+MIT lisenziyası.
