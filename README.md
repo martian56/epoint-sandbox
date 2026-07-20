@@ -132,6 +132,26 @@ All 30 documented endpoints are implemented.
 | B2B | `b2b/payment`, `b2b/payment/{order_id}` |
 | Health | `heartbeat` |
 
+### Apple Pay and Google Pay
+
+Both run through `token/widget`, which returns a `widget_url` you embed rather than redirect to.
+One widget serves both wallets; the device decides which button it can show.
+
+```html
+<iframe src="{widget_url}" width="100%" height="330"></iframe>
+```
+
+The result arrives as a `postMessage` to the page hosting the iframe, not as a redirect:
+
+```js
+window.addEventListener('message', (event) => {
+  // { status: 'success', payment: { order_id, transaction, card_mask, ... } }
+})
+```
+
+The signed callback to your `result_url` still fires, and it is the one to settle the order on.
+Inside the sandbox widget you can pick which test card the wallet holds, so declines are reachable.
+
 Balances are a real ledger: payments credit, commission and refunds debit, splits move between
 accounts. Invoice SMS and email are captured in the dashboard rather than delivered.
 
