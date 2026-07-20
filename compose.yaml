@@ -1,0 +1,37 @@
+# Local development: Postgres only, run the API and dashboard from source.
+# For the packaged sandbox use the image instead:
+#   docker run -p 8181:8181 epoint-sandbox
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: epoint
+      POSTGRES_PASSWORD: epoint
+      POSTGRES_DB: epoint_sandbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U epoint"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Bring your own Postgres instead of the bundled one:
+  #   docker compose --profile packaged up
+  sandbox:
+    profiles: ["packaged"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      EPOINT_DATABASE_URL: postgresql+psycopg://epoint:epoint@db:5432/epoint_sandbox
+    ports:
+      - "8181:8181"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

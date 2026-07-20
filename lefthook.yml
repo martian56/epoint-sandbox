@@ -1,0 +1,24 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,tsx,json,jsonc}"
+      run: bunx biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    ruff-format:
+      root: apps/api/
+      glob: "*.py"
+      run: uv run ruff format {staged_files}
+      stage_fixed: true
+    ruff-lint:
+      root: apps/api/
+      glob: "*.py"
+      run: uv run ruff check --fix {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    typecheck:
+      run: bun run typecheck
+    test:
+      run: bun run test

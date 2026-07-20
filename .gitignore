@@ -1,0 +1,47 @@
+_private/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+
+# --- JS / Bun ---
+node_modules/
+.vite/
+apps/web/dist/
+*.tsbuildinfo
+
+# --- Test / tooling output ---
+playwright-report/
+test-results/
+blob-report/
+.playwright-mcp/
+
+# --- Env & secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Docker / local data ---
+pgdata/
+*.sqlite
+*.db
+# Real gateway recordings can contain account detail, so they stay local.
+**/contract-recordings/production/

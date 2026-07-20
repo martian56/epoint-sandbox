@@ -1,0 +1,5 @@
+# Shell scripts must keep LF endings or the container cannot find its interpreter.
+*.sh text eol=lf
+
+# Keep everything else normalised in the repo.
+* text=auto
