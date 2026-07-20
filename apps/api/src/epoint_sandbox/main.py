@@ -114,15 +114,29 @@ _checkout_assets = Path(__file__).parent / "web" / "static"
 app.mount("/checkout-assets", StaticFiles(directory=_checkout_assets), name="checkout-assets")
 
 _dist = Path(__file__).parent / settings.web_dist_path
+
+# Asset filenames carry a content hash, so they can be cached forever. The shell that
+# points at them cannot: a stale copy asks for a hash that a newer image no longer has.
+IMMUTABLE = "public, max-age=31536000, immutable"
+REVALIDATE = "no-cache"
+
+
+class HashedAssets(StaticFiles):
+    def file_response(self, *args: Any, **kwargs: Any) -> Response:
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = IMMUTABLE
+        return response
+
+
 if _dist.is_dir():
-    app.mount("/assets", StaticFiles(directory=_dist / "assets"), name="assets")
+    app.mount("/assets", HashedAssets(directory=_dist / "assets"), name="assets")
 
     @app.get("/{path:path}", include_in_schema=False)
     async def spa(path: str) -> Response:
         candidate = _dist / path
         if path and candidate.is_file():
-            return FileResponse(candidate)
-        return FileResponse(_dist / "index.html")
+            return FileResponse(candidate, headers={"Cache-Control": REVALIDATE})
+        return FileResponse(_dist / "index.html", headers={"Cache-Control": REVALIDATE})
 
 else:
 

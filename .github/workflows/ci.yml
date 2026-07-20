@@ -78,12 +78,31 @@ jobs:
         run: |
           docker run -d --name sandbox -p 8181:8181 epoint-sandbox:ci
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8181/api/heartbeat > /dev/null; then
-              echo "sandbox is up"
-              exit 0
+            curl -fsS http://localhost:8181/api/heartbeat > /dev/null && break
+            if [ "$i" = 60 ]; then
+              echo "sandbox did not become healthy"
+              docker logs sandbox
+              exit 1
             fi
             sleep 2
           done
-          echo "sandbox did not become healthy"
-          docker logs sandbox
-          exit 1
+          echo "sandbox is up"
+
+      - name: Dashboard bundle is served with sane caching
+        run: |
+          # GET, not HEAD: the SPA route answers GET only.
+          header() { curl -s -D- -o /dev/null "$1" | tr -d '\r' | grep -i '^cache-control:' | cut -d' ' -f2-; }
+
+          shell=$(header http://localhost:8181/)
+          if [ "$shell" != "no-cache" ]; then
+            echo "index.html must revalidate, got '${shell:-none}'."
+            echo "A cached shell requests an asset hash a newer image no longer has."
+            exit 1
+          fi
+
+          asset=$(curl -s http://localhost:8181/ | grep -o '/assets/[^"]*\.js' | head -1)
+          cache=$(header "http://localhost:8181$asset")
+          case "$cache" in
+            *immutable*) echo "shell revalidates, assets immutable" ;;
+            *) echo "hashed assets should be immutable, got '${cache:-none}'"; exit 1 ;;
+          esac
