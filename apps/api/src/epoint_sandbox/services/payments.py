@@ -41,6 +41,7 @@ def create_transaction(
     allowed_currencies: set[str] = SUPPORTED_CURRENCIES,
     default_currency: str | None = None,
     require_language: bool = True,
+    commit: bool = True,
 ) -> Transaction:
     required = ["amount", "order_id"] if default_currency else ["amount", "currency", "order_id"]
     # Documented required everywhere except token/widget, so refuse rather than default it.
@@ -84,6 +85,10 @@ def create_transaction(
     session.flush()
     transaction.transaction_id = ids.transaction_id(transaction.id)
     session.flush()
+    # Make the checkout token durable before the response carries it back, or a
+    # client that reads it at once can beat the after-response commit.
+    if commit:
+        session.commit()
     return transaction
 
 

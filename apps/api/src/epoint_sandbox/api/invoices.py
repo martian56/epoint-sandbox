@@ -82,6 +82,7 @@ async def create(request: Request, signed: SignedRequestDep, session: SessionDep
     _apply(invoice, signed)
     session.add(invoice)
     session.flush()
+    session.commit()
 
     return {"status": "success", "id": invoice.id, "message": "", "trace_id": _trace(request)}
 
