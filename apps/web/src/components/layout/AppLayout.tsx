@@ -1,9 +1,34 @@
 import type { ReactNode } from 'react'
 import { Outlet } from 'react-router'
 import logoUrl from '@/assets/epoint-logo.svg'
+import { Button } from '@/components/ui/Button'
+import { useT } from '@/i18n'
+import { useAuth } from '@/lib/auth'
 import { Footer } from './Footer'
 import { LanguageMenu, MerchantMenu } from './HeaderMenus'
 import { MobileNav, Sidebar } from './Sidebar'
+
+function AuthControl() {
+  const t = useT()
+  const { session, signOut } = useAuth()
+
+  if (!session?.auth_required) {
+    return (
+      <span
+        title={t.login.openAccessHint}
+        className="rounded-pill bg-warning-tint px-2.5 py-1 font-medium text-warning-deep text-xs"
+      >
+        {t.login.openAccess}
+      </span>
+    )
+  }
+
+  return (
+    <Button variant="ghost" onClick={() => void signOut()}>
+      {t.login.signOut}
+    </Button>
+  )
+}
 
 function Header() {
   return (
@@ -16,6 +41,7 @@ function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        <AuthControl />
         <LanguageMenu />
         <MerchantMenu />
       </div>
