@@ -1,7 +1,8 @@
 import pytest
 
-from epoint_sandbox.config import get_settings
-from epoint_sandbox.services import auth
+from epoint_sandbox.config import DEFAULT_MERCHANTS, get_settings
+from epoint_sandbox.services import auth, merchants
+from epoint_sandbox.services.seed import seed_default_merchants
 
 EMAIL = "admin@example.com"
 PASSWORD = "staging-password"
@@ -134,3 +135,23 @@ class TestTokens:
     def test_tokens_are_refused_when_auth_is_off(self):
         get_settings.cache_clear()
         assert auth.token_valid("anything") is False
+
+
+class TestSeededKeys:
+    def test_published_keys_are_used_when_the_sandbox_is_open(self, session):
+        get_settings.cache_clear()
+        seeded = seed_default_merchants(session)
+        assert seeded[0].private_key == DEFAULT_MERCHANTS[0][1]
+
+    def test_generated_keys_are_used_when_a_password_is_set(self, session, secured):
+        seeded = seed_default_merchants(session)
+
+        published = {private for _, private, _ in DEFAULT_MERCHANTS}
+        for merchant in seeded:
+            assert merchant.private_key not in published
+            assert len(merchant.private_key) == merchants.PRIVATE_KEY_LENGTH
+
+    def test_public_keys_stay_predictable_either_way(self, session, secured):
+        """Only the secret changes. Split payments still reference i000000002."""
+        seeded = seed_default_merchants(session)
+        assert [m.public_key for m in seeded] == [public for public, _, _ in DEFAULT_MERCHANTS]
