@@ -23,6 +23,8 @@ def _redirect_response(
     body: dict[str, Any] = {
         "status": "success",
         "redirect_url": payments.checkout_url(transaction),
+        # Documented on every one of these. The production wording is unknown.
+        "message": "",
         "trace_id": trace_id,
     }
     if include_transaction:

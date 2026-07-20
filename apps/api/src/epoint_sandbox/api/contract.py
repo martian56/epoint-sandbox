@@ -154,6 +154,12 @@ UNVERIFIED: dict[str, str] = {
     "/api/1/b2b/payment": "not exercised against production",
     "/api/1/b2b/payment/{order_id}": "not exercised against production",
     "/api/1/card-registration": "redirect_url is undocumented; confirm against production",
+    "/api/1/card-registration-with-pay": (
+        "the documented response carries rrn, bank_response and operation_code 200, "
+        "which only exist once the customer has paid, so it reads as the callback "
+        "payload rather than the response; those fields are withheld until a "
+        "production capture settles it"
+    ),
     "/api/1/payment-change-sum": (
         "docs omit transaction where siblings include it; the sandbox withholds it as "
         "the safe direction, but production may send it"
@@ -162,5 +168,9 @@ UNVERIFIED: dict[str, str] = {
     "/api/1/request": (
         "the sandbox accepts any language value; whether production validates it "
         "against az, en and ru is unknown"
+    ),
+    "/api/1/reverse": (
+        "message is documented but the production wording is unknown, so an empty "
+        "string is returned to match the shape"
     ),
 }
