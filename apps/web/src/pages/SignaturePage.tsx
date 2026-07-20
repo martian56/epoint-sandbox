@@ -15,7 +15,7 @@ const DEFAULT_PAYLOAD = JSON.stringify(
 
 function Row({ label, value, mono = true }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className="text-muted text-sm mb-1">{label}</div>
       <pre
         className={`overflow-x-auto rounded-field border border-line bg-surface-alt p-3 text-xs ${mono ? 'font-mono' : ''}`}
@@ -56,7 +56,7 @@ function Verify() {
   return (
     <Panel title={t.signature.verifyTitle}>
       <div className="grid gap-4">
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className="text-muted text-sm">{t.signature.privateKey}</span>
           <input
             value={privateKey}
@@ -65,7 +65,7 @@ function Verify() {
           />
         </label>
 
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className="text-muted text-sm">{t.signature.data}</span>
           <textarea
             value={data}
@@ -75,7 +75,7 @@ function Verify() {
           />
         </label>
 
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className="text-muted text-sm">{t.signature.signature}</span>
           <input
             value={signature}
@@ -134,7 +134,7 @@ function Build() {
   return (
     <Panel title={t.signature.buildTitle}>
       <div className="grid gap-4">
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className="text-muted text-sm">{t.signature.privateKey}</span>
           <input
             value={privateKey}
@@ -143,7 +143,7 @@ function Build() {
           />
         </label>
 
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className="text-muted text-sm">{t.signature.payload}</span>
           <textarea
             value={payload}
