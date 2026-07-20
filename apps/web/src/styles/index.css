@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "@fontsource-variable/figtree";
+@import "./theme.css";
+
+@theme {
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.2;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.2;
+  --text-base: 1rem;
+  --text-base--line-height: 1.2;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.2;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.2;
+}
+
+@layer base {
+  /* Root stays at 16px so rem spacing matches epoint. Body copy is 14px. */
+  body {
+    @apply bg-surface text-ink font-sans text-sm antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-3 ring-brand/25;
+  }
+}

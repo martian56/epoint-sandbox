@@ -1,0 +1,47 @@
+{
+  "$comment": "Single source of truth for design tokens. Measured from the epoint dashboard. Run 'bun run tokens' after editing.",
+  "color": {
+    "brand": "#b83b8c",
+    "brand-bright": "#c54697",
+    "brand-deep": "#620046",
+    "brand-mid": "#932f71",
+    "brand-hover": "#9b3276",
+
+    "tint-50": "#fcf7fb",
+    "tint-100": "#ffebf4",
+    "tint-200": "#ffd8eb",
+
+    "ink": "#000000",
+    "body": "#4a4a4a",
+    "muted": "#645c5f",
+    "subtle": "#9c9c9c",
+
+    "line": "#ebe9e9",
+    "line-strong": "#dedede",
+    "surface": "#ffffff",
+    "canvas": "#fcfcfc",
+    "surface-alt": "#f7f7f7",
+
+    "success": "#28a745",
+    "danger": "#dc3545",
+    "warning": "#ffc107"
+  },
+  "radius": {
+    "field": "8px",
+    "card": "9px",
+    "card-lg": "16px",
+    "pill": "9999px"
+  },
+  "shadow": {
+    "card": "0 16px 32px rgb(0 0 0 / 0.08)",
+    "dropdown": "0 32px 64px rgb(0 0 0 / 0.08)",
+    "popover": "0 4px 12px rgb(0 0 0 / 0.15)"
+  },
+  "font": {
+    "sans": "'Figtree Variable', system-ui, sans-serif",
+    "mono": "ui-monospace, SFMono-Regular, Menlo, monospace"
+  },
+  "breakpoint": {
+    "lg": "992px"
+  }
+}
