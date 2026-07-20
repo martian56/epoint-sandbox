@@ -75,6 +75,7 @@ async def card_registration(
     session.flush()
     holder.transaction_id = ids.transaction_id(holder.id)
     session.flush()
+    session.commit()
 
     return {
         "status": "success",
@@ -133,7 +134,12 @@ def _charge_saved_card(
 ) -> Transaction:
     """Server-to-server charge. No redirect."""
     transaction = payments.create_transaction(
-        session, signed, endpoint=endpoint, trace_id=trace_id, allowed_currencies=AZN_ONLY
+        session,
+        signed,
+        endpoint=endpoint,
+        trace_id=trace_id,
+        allowed_currencies=AZN_ONLY,
+        commit=False,
     )
     outcome = magic_cards.outcome_for_code(card.bank_code)
 
@@ -152,6 +158,7 @@ def _charge_saved_card(
 
     session.flush()
     callbacks.deliver(session, transaction)
+    session.commit()
     return transaction
 
 
@@ -210,6 +217,7 @@ async def split_execute_pay(
         endpoint="split-execute-pay",
         trace_id=trace_id,
         allowed_currencies=AZN_ONLY,
+        commit=False,
     )
     if split_amount > transaction.amount:
         raise EpointError("split_amount cannot exceed amount")
@@ -233,6 +241,7 @@ async def split_execute_pay(
 
     session.flush()
     callbacks.deliver(session, transaction)
+    session.commit()
 
     response = _charge_response(transaction, trace_id)
     response["split_amount"] = float(split_amount)

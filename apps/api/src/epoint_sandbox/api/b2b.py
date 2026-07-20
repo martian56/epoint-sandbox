@@ -89,6 +89,7 @@ async def create_payment(
     )
     session.add(payment)
     session.flush()
+    session.commit()
 
     return {"status": "success", "order_id": payment.order_id, "bulkId": payment.bulk_id}
 
