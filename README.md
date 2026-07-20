@@ -24,7 +24,7 @@ Every path under `/api/1/` matches production, so nothing else changes.
 | `http://localhost:8181/checkout/{token}` | Hosted checkout page |
 | `http://localhost:8181/docs` | OpenAPI schema |
 
-## Keys
+## Local development
 
 Two accounts are seeded, so split payments work immediately:
 
@@ -36,6 +36,30 @@ Two accounts are seeded, so split payments work immediately:
 Or create your own on the **API Management** page: set the website, success, failed and result
 URLs, then copy the key pair. Keys use epoint's formats, `i` plus nine digits and a 24 character
 secret, so anything validating their shape keeps working in production.
+
+A typical loop:
+
+```bash
+docker run -d -p 8181:8181 --name epoint \
+  --add-host=host.docker.internal:host-gateway \
+  ghcr.io/martian56/epoint-sandbox
+```
+
+Point your `result_url` at your own machine. Callbacks originate inside the container, so
+`localhost` there means the container, not you:
+
+```bash
+curl -X PATCH http://localhost:8181/_sandbox/merchants/i000000001 \
+  -H "Content-Type: application/json" \
+  -d '{"result_url": "http://host.docker.internal:3000/webhooks/epoint"}'
+```
+
+Then drive a payment: POST to `/api/1/request`, redirect to the `redirect_url` you get back, pay
+with `4111 1111 1111 1111`, and watch the callback arrive. When something fails, the Request Log
+page has the raw `data`, the signature and whether it verified; the Callbacks page has every
+delivery attempt with your response body.
+
+There is no login locally. Every restart is a clean database unless you mount a volume.
 
 ## Test cards
 
@@ -130,9 +154,10 @@ Every response carries `X-Epoint-Sandbox: 1`. Assert its absence in your product
 Bundled data lives at `/var/lib/postgresql/data`. Mount a volume there to keep it between
 containers.
 
-## Running it in staging
+## Staging
 
-The sandbox is usable as a shared service alongside your staging stack, not just on a laptop.
+The same container runs as a shared service next to your staging stack. Set an admin password and
+the dashboard requires a login.
 
 ```yaml
 services:
@@ -146,50 +171,52 @@ services:
     ports: ['8181:8181']
 ```
 
-Your services reach it by container name, so `result_url` becomes
-`http://your-api:3000/webhooks/epoint` with no `host.docker.internal` involved.
+Three things change compared to local.
 
-Set `EPOINT_PUBLIC_BASE_URL` to whatever hostname your services use, or the `redirect_url` the API
-hands back will point at `localhost` and your checkout redirects will break.
+**Your services reach it by container name.** `result_url` becomes
+`http://your-api:3000/webhooks/epoint`, with no `host.docker.internal` involved.
 
-## Authentication
+**`EPOINT_PUBLIC_BASE_URL` has to be set.** The `redirect_url` the API hands back is built from it.
+Leave it at the default and your checkout redirects will send customers to `localhost`.
 
-Unset by default, so `docker run` stays a one-liner locally. Set both variables and the dashboard
-requires a login:
+**The seeded keys are generated, not the published ones.** The keys in the table above ship in the
+public image, so a secured instance issues random ones instead. The public keys stay `i000000001`
+and `i000000002` so split payments still work, but the secrets are unique to your deployment. Read
+them from the API Management page after your first login.
+
+That last point matters: the login gate protects the dashboard and `/_sandbox/*`, but `/api/1/*` is
+signature-authenticated only. If it kept the published secrets, anyone who could reach the sandbox
+could sign valid requests and push fake payment callbacks into your staging system.
+
+### Signing in
+
+Credentials are read at startup rather than claimed through a first-run screen, so there is no
+window after deploy where an unclaimed instance is waiting to be taken over.
+
+Scripts use the password as a bearer token instead of a session cookie:
 
 ```bash
-docker run -p 8181:8181 \
-  -e EPOINT_ADMIN_EMAIL=admin@example.com \
-  -e EPOINT_ADMIN_PASSWORD=choose-something \
-  ghcr.io/martian56/epoint-sandbox:0.1.0
+curl https://epoint-sandbox.staging.internal/_sandbox/merchants \
+  -H "Authorization: Bearer $EPOINT_ADMIN_PASSWORD"
 ```
 
-Credentials are read at startup rather than set through a first-run screen, so there is no window
-after deploy where an unclaimed instance is waiting to be taken over.
-
-Scripts authenticate with the password as a bearer token instead of a session cookie:
-
-```bash
-curl http://localhost:8181/_sandbox/merchants \
-  -H "Authorization: Bearer choose-something"
-```
-
-`/api/1/*` is unaffected. It is already signature-authenticated, and requiring more would break
-the promise that only the base URL and keys change between here and production. `/_sandbox/health`
-also stays open so container health checks work without credentials.
-
-Sessions last `EPOINT_SESSION_TTL_HOURS` (12 by default) and are signed with a key derived from the
+Sessions last `EPOINT_SESSION_TTL_HOURS`, 12 by default, and are signed with a key derived from the
 credentials, so changing the password signs everyone out.
+
+`/_sandbox/health` stays open so container health checks work without credentials.
 
 ## Security
 
+`/api/1/*` is never gated by the admin password. It is already signature-authenticated, and
+requiring more would break the promise that only the base URL and keys change between here and
+production. Protect it by keeping the sandbox off untrusted networks, not by adding a second layer.
+
 With no admin password set there is no authentication at all: the dashboard is open and
 `GET /_sandbox/merchants` returns private keys in plaintext. The dashboard shows a **No auth** badge
-when it is in that state. Fine on `localhost`, not fine on a shared network.
+in the header when it is in that state. Fine on `localhost`, not fine anywhere else.
 
-Set a password for anything reachable by other people, and do not expose the sandbox to the public
-internet either way. It holds no real money, but it will happily show anyone your callback URLs and
-staging hostnames.
+Do not expose the sandbox to the public internet either way. It holds no real money, but it will
+show anyone your callback URLs and staging hostnames.
 
 ## Contributing
 
