@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     seed_merchants: bool = True
     web_dist_path: str = "static"
 
+    # Both set turns on dashboard auth. Unset leaves it open, which is the local default.
+    admin_email: str = ""
+    admin_password: str = ""
+    session_ttl_hours: int = 12
+
     # 3% per transaction, taken from epoint's payment history.
     commission_rate: float = 0.03
 
