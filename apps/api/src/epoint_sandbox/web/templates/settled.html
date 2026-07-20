@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="{{ transaction.language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ t.title }}</title>
+<link rel="stylesheet" href="/checkout-assets/tokens.css">
+<link rel="stylesheet" href="/checkout-assets/widget.css">
+</head>
+<body>
+<div class="widget settled">
+  <div class="outcome {{ transaction.status.value }}">
+    <span class="pill {{ transaction.status.value }}">{{ transaction.status.value }}</span>
+    <p>{{ transaction.message }}</p>
+  </div>
+
+  <dl>
+    <div><dt>{{ t.amount }}</dt><dd>{{ '%.2f'|format(transaction.amount) }} {{ transaction.currency }}</dd></div>
+    <div><dt>Transaction</dt><dd>{{ transaction.transaction_id }}</dd></div>
+    {% if transaction.card_mask %}<div><dt>{{ t.number }}</dt><dd>{{ transaction.card_mask }}</dd></div>{% endif %}
+    {% if transaction.rrn %}<div><dt>RRN</dt><dd>{{ transaction.rrn }}</dd></div>{% endif %}
+  </dl>
+</div>
+
+<script id="payload" type="application/json">
+{
+  "status": {{ ('success' if transaction.status.value == 'success' else 'error')|tojson }},
+  "payment": {
+    "order_id": {{ transaction.order_id|tojson }},
+    "status": {{ transaction.status.value|tojson }},
+    "code": {{ (transaction.bank_code or '')|tojson }},
+    "message": {{ (transaction.message or '')|tojson }},
+    "transaction": {{ transaction.transaction_id|tojson }},
+    "bank_transaction": {{ (transaction.bank_transaction or '')|tojson }},
+    "rrn": {{ transaction.rrn|tojson }},
+    "card_mask": {{ transaction.card_mask|tojson }},
+    "amount": {{ transaction.amount|float }}
+  }
+}
+</script>
+<script>
+  // Production posts the result to the page hosting the iframe rather than redirecting.
+  var payload = JSON.parse(document.getElementById('payload').textContent)
+  if (window.parent !== window) window.parent.postMessage(payload, '*')
+</script>
+</body>
+</html>

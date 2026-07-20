@@ -1,0 +1,166 @@
+/* Apple Pay and Google Pay widget. Sized for an iframe, so no page chrome. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+
+.widget {
+  padding: 20px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.summary .merchant {
+  color: var(--color-muted);
+}
+
+.summary .amount {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.wallet {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-field);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.wallet svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.wallet.apple {
+  background: #000;
+}
+
+.wallet.apple:hover {
+  background: #222;
+}
+
+.wallet.google {
+  background: #3c4043;
+}
+
+.wallet.google:hover {
+  background: #55595e;
+}
+
+.test-card {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.test-card span {
+  display: block;
+  color: var(--color-muted);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.test-card select {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-field);
+  font: inherit;
+  font-size: 14px;
+  background: var(--color-surface);
+}
+
+.note {
+  color: var(--color-subtle);
+  font-size: 12px;
+  margin: 12px 0 0;
+  text-align: center;
+}
+
+.settled .outcome {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.settled .outcome p {
+  margin: 10px 0 0;
+  color: var(--color-muted);
+}
+
+.pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--color-surface-alt);
+  color: var(--color-muted);
+}
+
+.pill.success {
+  background: #e8f6ec;
+  color: var(--color-success);
+}
+
+.pill.failed,
+.pill.error,
+.pill.server_error {
+  background: #fdeaec;
+  color: var(--color-danger);
+}
+
+.settled dl {
+  margin: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.settled dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.settled dt {
+  color: var(--color-muted);
+}
+
+.settled dd {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 13px;
+  text-align: right;
+}
