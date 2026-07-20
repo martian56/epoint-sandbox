@@ -30,7 +30,7 @@ async def refund_request(
     signed: SignedRequestDep,
     session: SessionDep,
 ) -> dict[str, Any]:
-    signed.require("card_id", "order_id", "amount", "currency")
+    signed.require("language", "card_id", "order_id", "amount", "currency")
     trace_id = _trace(request)
 
     card = session.scalar(
@@ -108,7 +108,7 @@ async def reverse(
     signed: SignedRequestDep,
     session: SessionDep,
 ) -> dict[str, Any]:
-    signed.require("transaction", "currency")
+    signed.require("language", "transaction", "currency")
     trace_id = _trace(request)
     payments.validate_currency(str(signed.get("currency")), AZN_ONLY)
 
@@ -144,7 +144,7 @@ async def reverse(
     )
     callbacks.deliver(session, original)
 
-    return {"status": "success", "trace_id": trace_id}
+    return {"status": "success", "message": "", "trace_id": trace_id}
 
 
 @router.post("/pre-auth-complete")

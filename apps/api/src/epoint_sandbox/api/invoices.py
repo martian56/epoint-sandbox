@@ -76,19 +76,19 @@ def _serialise(invoice: Invoice) -> dict[str, Any]:
 
 @router.post("/create")
 async def create(request: Request, signed: SignedRequestDep, session: SessionDep) -> dict[str, Any]:
-    signed.require("sum", "period_from", "period_to")
+    signed.require("sum", "display", "save_as_template", "period_from", "period_to")
 
     invoice = Invoice(merchant_id=signed.merchant.id, total=0)
     _apply(invoice, signed)
     session.add(invoice)
     session.flush()
 
-    return {"status": "success", "id": invoice.id, "trace_id": _trace(request)}
+    return {"status": "success", "id": invoice.id, "message": "", "trace_id": _trace(request)}
 
 
 @router.post("/update")
 async def update(request: Request, signed: SignedRequestDep, session: SessionDep) -> dict[str, Any]:
-    signed.require("sum", "period_from", "period_to")
+    signed.require("sum", "display", "save_as_template", "period_from", "period_to")
     invoice = _load(session, signed)
 
     if invoice.status is not InvoiceStatus.WAITING:
@@ -96,13 +96,18 @@ async def update(request: Request, signed: SignedRequestDep, session: SessionDep
 
     _apply(invoice, signed)
     session.flush()
-    return {"status": "success", "trace_id": _trace(request)}
+    return {"status": "success", "message": "", "trace_id": _trace(request)}
 
 
 @router.post("/view")
 async def view(request: Request, signed: SignedRequestDep, session: SessionDep) -> dict[str, Any]:
     invoice = _load(session, signed)
-    return {"status": "success", "invoice": _serialise(invoice), "trace_id": _trace(request)}
+    return {
+        "status": "success",
+        "invoice": _serialise(invoice),
+        "message": "",
+        "trace_id": _trace(request),
+    }
 
 
 @router.post("/list")
@@ -124,6 +129,7 @@ async def list_invoices(
     return {
         "status": "success",
         "invoices": [_serialise(i) for i in rows],
+        "message": "",
         "trace_id": _trace(request),
     }
 
@@ -141,7 +147,7 @@ async def send_sms(
         recipient=str(signed.get("phone")),
         trace_id=_trace(request),
     )
-    return {"status": "success", "trace_id": _trace(request)}
+    return {"status": "success", "message": "", "trace_id": _trace(request)}
 
 
 @router.post("/send-email")
@@ -157,4 +163,4 @@ async def send_email(
         recipient=str(signed.get("email")),
         trace_id=_trace(request),
     )
-    return {"status": "success", "trace_id": _trace(request)}
+    return {"status": "success", "message": "", "trace_id": _trace(request)}

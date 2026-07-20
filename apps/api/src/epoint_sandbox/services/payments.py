@@ -40,8 +40,12 @@ def create_transaction(
     trace_id: str,
     allowed_currencies: set[str] = SUPPORTED_CURRENCIES,
     default_currency: str | None = None,
+    require_language: bool = True,
 ) -> Transaction:
     required = ["amount", "order_id"] if default_currency else ["amount", "currency", "order_id"]
+    # Documented required everywhere except token/widget, so refuse rather than default it.
+    if require_language:
+        required.append("language")
     request.require(*required)
 
     amount = parse_amount(request.get("amount"))

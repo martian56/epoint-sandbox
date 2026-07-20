@@ -68,6 +68,7 @@ async def installment_request(
         "status": "success",
         "redirect_url": payments.checkout_url(transaction),
         "transaction": transaction.transaction_id,
+        "message": "",
         "trace_id": trace_id,
     }
 
@@ -99,6 +100,7 @@ async def wallet_payment(
         "status": "success",
         "redirect_url": payments.checkout_url(transaction),
         "transaction": transaction.transaction_id,
+        "message": "",
         "trace_id": trace_id,
     }
 
@@ -118,6 +120,7 @@ async def token_widget(
         trace_id=trace_id,
         allowed_currencies=AZN_ONLY,
         default_currency="AZN",
+        require_language=False,
     )
     base = get_settings().public_base_url
     return {
