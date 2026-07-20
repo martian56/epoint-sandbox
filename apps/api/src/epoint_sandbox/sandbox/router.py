@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from epoint_sandbox import signing
+from epoint_sandbox.api.auth import AdminOnly
 from epoint_sandbox.api.deps import SessionDep
 from epoint_sandbox.models import (
     B2BPayment,
@@ -21,10 +22,13 @@ from epoint_sandbox.models import (
 from epoint_sandbox.services import features, magic_cards, payments
 from epoint_sandbox.services import merchants as merchant_service
 
-router = APIRouter(prefix="/_sandbox", tags=["sandbox"])
+router = APIRouter(prefix="/_sandbox", tags=["sandbox"], dependencies=[AdminOnly])
+
+# Container health checks run without credentials, so this one stays open.
+public_router = APIRouter(prefix="/_sandbox", tags=["sandbox"])
 
 
-@router.get("/health")
+@public_router.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
 

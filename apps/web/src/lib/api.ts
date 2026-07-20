@@ -8,6 +8,7 @@ import type {
   NotificationRow,
   RequestLogEntry,
   SavedCard,
+  SessionState,
   SignatureExplanation,
   TestCard,
   Transaction,
@@ -55,6 +56,13 @@ function listPath(base: string, { limit = 50, merchant }: ListOptions = {}): str
 }
 
 export const api = {
+  session: () => request<SessionState>('/auth/session'),
+
+  login: (email: string, password: string) =>
+    post<SessionState>('/auth/login', { email, password }),
+
+  logout: () => post<SessionState>('/auth/logout', {}),
+
   merchants: () => request<Merchant[]>('/merchants'),
 
   createMerchant: (input: MerchantInput) =>

@@ -21,6 +21,8 @@
   --color-success: #28a745;
   --color-danger: #dc3545;
   --color-warning: #ffc107;
+  --color-warning-tint: #fff4d4;
+  --color-warning-deep: #7a5300;
 
   --radius-field: 8px;
   --radius-card: 9px;

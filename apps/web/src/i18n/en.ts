@@ -232,6 +232,20 @@ export const en = {
     remove: 'Delete',
     active: 'active',
   },
+  login: {
+    title: 'Sign in',
+    subtitle: 'This sandbox is protected by an admin password.',
+    email: 'Email',
+    password: 'Password',
+    signIn: 'Sign in',
+    signingIn: 'Signing in…',
+    failed: 'Could not sign in. Try again.',
+    hint: 'Credentials are set with EPOINT_ADMIN_EMAIL and EPOINT_ADMIN_PASSWORD.',
+    signOut: 'Sign out',
+    openAccess: 'No auth',
+    openAccessHint:
+      'Anyone who can reach this sandbox can read your keys. Set EPOINT_ADMIN_EMAIL and EPOINT_ADMIN_PASSWORD to require a login.',
+  },
   footer: {
     sandbox: 'Sandbox',
     reference: 'Reference',

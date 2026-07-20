@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from epoint_sandbox.api.auth import router as auth_router
 from epoint_sandbox.api.b2b import router as b2b_router
 from epoint_sandbox.api.cards import router as cards_router
 from epoint_sandbox.api.epoint import router as epoint_router
@@ -18,6 +19,7 @@ from epoint_sandbox.api.money import router as money_router
 from epoint_sandbox.config import get_settings
 from epoint_sandbox.db import SessionLocal
 from epoint_sandbox.models import RequestLog
+from epoint_sandbox.sandbox.router import public_router as sandbox_public_router
 from epoint_sandbox.sandbox.router import router as sandbox_router
 from epoint_sandbox.services import ids
 from epoint_sandbox.services.seed import seed_default_merchants
@@ -103,6 +105,8 @@ for api_router in (
 ):
     app.include_router(api_router)
 
+app.include_router(auth_router)
+app.include_router(sandbox_public_router)
 app.include_router(sandbox_router)
 app.include_router(checkout_router)
 

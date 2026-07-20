@@ -24,7 +24,9 @@
 
     "success": "#28a745",
     "danger": "#dc3545",
-    "warning": "#ffc107"
+    "warning": "#ffc107",
+    "warning-tint": "#fff4d4",
+    "warning-deep": "#7a5300"
   },
   "radius": {
     "field": "8px",

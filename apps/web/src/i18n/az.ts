@@ -238,6 +238,20 @@ export const az: Dictionary = {
     remove: 'Sil',
     active: 'aktiv',
   },
+  login: {
+    title: 'Daxil olun',
+    subtitle: 'Bu sandbox admin parolu ilə qorunur.',
+    email: 'E-poçt',
+    password: 'Parol',
+    signIn: 'Daxil ol',
+    signingIn: 'Daxil olunur…',
+    failed: 'Daxil olmaq mümkün olmadı. Yenidən cəhd edin.',
+    hint: 'Məlumatlar EPOINT_ADMIN_EMAIL və EPOINT_ADMIN_PASSWORD ilə təyin edilir.',
+    signOut: 'Çıxış',
+    openAccess: 'Qorunmayır',
+    openAccessHint:
+      'Bu sandbox-a çıxışı olan hər kəs açarlarınızı görə bilər. Giriş tələb etmək üçün EPOINT_ADMIN_EMAIL və EPOINT_ADMIN_PASSWORD təyin edin.',
+  },
   footer: {
     sandbox: 'Sandbox',
     reference: 'Sənədlər',
