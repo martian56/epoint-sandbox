@@ -122,17 +122,74 @@ Every response carries `X-Epoint-Sandbox: 1`. Assert its absence in your product
 |---|---|
 | `EPOINT_DATABASE_URL` | Use your own Postgres instead of the bundled one |
 | `EPOINT_PUBLIC_BASE_URL` | Base for the `redirect_url` values handed back to you, default `http://localhost:8181` |
+| `EPOINT_ADMIN_EMAIL` / `EPOINT_ADMIN_PASSWORD` | Set both to require a dashboard login. Unset means open. |
+| `EPOINT_SESSION_TTL_HOURS` | How long a dashboard session lasts, default `12` |
 | `EPOINT_COMMISSION_RATE` | Commission taken on settlement, default `0.03` |
 | `EPOINT_SEED_MERCHANTS` | Set `false` to start with no accounts |
 
 Bundled data lives at `/var/lib/postgresql/data`. Mount a volume there to keep it between
 containers.
 
+## Running it in staging
+
+The sandbox is usable as a shared service alongside your staging stack, not just on a laptop.
+
+```yaml
+services:
+  epoint-sandbox:
+    image: ghcr.io/martian56/epoint-sandbox:0.1.0
+    environment:
+      EPOINT_ADMIN_EMAIL: admin@example.com
+      EPOINT_ADMIN_PASSWORD: ${EPOINT_ADMIN_PASSWORD}
+      EPOINT_PUBLIC_BASE_URL: https://epoint-sandbox.staging.internal
+      EPOINT_DATABASE_URL: postgresql+psycopg://epoint:epoint@db:5432/epoint_sandbox
+    ports: ['8181:8181']
+```
+
+Your services reach it by container name, so `result_url` becomes
+`http://your-api:3000/webhooks/epoint` with no `host.docker.internal` involved.
+
+Set `EPOINT_PUBLIC_BASE_URL` to whatever hostname your services use, or the `redirect_url` the API
+hands back will point at `localhost` and your checkout redirects will break.
+
+## Authentication
+
+Unset by default, so `docker run` stays a one-liner locally. Set both variables and the dashboard
+requires a login:
+
+```bash
+docker run -p 8181:8181 \
+  -e EPOINT_ADMIN_EMAIL=admin@example.com \
+  -e EPOINT_ADMIN_PASSWORD=choose-something \
+  ghcr.io/martian56/epoint-sandbox:0.1.0
+```
+
+Credentials are read at startup rather than set through a first-run screen, so there is no window
+after deploy where an unclaimed instance is waiting to be taken over.
+
+Scripts authenticate with the password as a bearer token instead of a session cookie:
+
+```bash
+curl http://localhost:8181/_sandbox/merchants \
+  -H "Authorization: Bearer choose-something"
+```
+
+`/api/1/*` is unaffected. It is already signature-authenticated, and requiring more would break
+the promise that only the base URL and keys change between here and production. `/_sandbox/health`
+also stays open so container health checks work without credentials.
+
+Sessions last `EPOINT_SESSION_TTL_HOURS` (12 by default) and are signed with a key derived from the
+credentials, so changing the password signs everyone out.
+
 ## Security
 
-There is no authentication. The dashboard is open and `GET /_sandbox/merchants` returns private
-keys in plaintext. That is fine on `localhost`, which is the only place it is meant to run. Do not
-publish port 8181 to a network.
+With no admin password set there is no authentication at all: the dashboard is open and
+`GET /_sandbox/merchants` returns private keys in plaintext. The dashboard shows a **No auth** badge
+when it is in that state. Fine on `localhost`, not fine on a shared network.
+
+Set a password for anything reachable by other people, and do not expose the sandbox to the public
+internet either way. It holds no real money, but it will happily show anyone your callback URLs and
+staging hostnames.
 
 ## Contributing
 
