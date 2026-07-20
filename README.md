@@ -17,12 +17,56 @@ https://epoint.az/api/1/request   ->   http://localhost:8181/api/1/request
 
 Every path under `/api/1/` matches production, so nothing else changes.
 
+![The sandbox dashboard, a copy of the epoint merchant cabinet](images/dashboard.png)
+
 | URL | |
 |---|---|
 | `http://localhost:8181` | Dashboard |
 | `http://localhost:8181/api/1/*` | Epoint-compatible API |
 | `http://localhost:8181/checkout/{token}` | Hosted checkout page |
 | `http://localhost:8181/docs` | OpenAPI schema |
+
+## What you get
+
+**Every payment lands somewhere you can see it.** The dashboard is a copy of epoint's, so what you
+learn here transfers. Transactions, a real balance ledger, saved cards, invoices, bank transfers,
+plus a request log and callback inspector that production has no equivalent for.
+
+**Failures on demand.** Epoint publishes no test cards, so the sandbox defines its own. The last
+three digits are the bank response code, so reading the number tells you what will happen. Want to
+test the declined path, or a gateway timeout where no callback ever arrives? Type a different
+number.
+
+![The test card catalogue](images/test-cards.png)
+
+**The signature mistake, named.** Epoint signs with `base64(sha1_raw(private_key + data +
+private_key))`, and the digest has to be the raw 20 bytes rather than the hex string. That single
+detail accounts for most failed integrations. Paste a failing pair in and the tool tells you which
+mistake you made.
+
+![The signature tool diagnosing a hex digest mistake](images/signature-tool.png)
+
+**Callbacks you can actually watch.** The sandbox posts to your `result_url` with the same signed
+payload production sends. Every attempt is recorded with the decoded payload, the raw `data`, the
+signature and your own response, so a webhook that quietly 500s is visible rather than mysterious.
+
+![A callback attempt with its decoded payload and signature](images/callbacks.png)
+
+**Keys and grants you control.** Rotate a private key and existing signatures stop verifying,
+exactly as in production. AMEX, Apple Pay, Google Pay, installments, wallets and B2B are off by
+default, because epoint grants them per merchant on request, so an integration meets the same
+refusal here that it would on go-live.
+
+![API management with keys, integration URLs and feature grants](images/api-management.png)
+
+**The hosted checkout page**, which is where your customer actually pays.
+
+![The hosted checkout page](images/checkout.png)
+
+**Apple Pay and Google Pay**, served as a widget you embed rather than redirect to, answering with
+a `postMessage` the way production does.
+
+![The wallet widget embedded in a merchant page](images/wallet-widget.png)
 
 ## Local development
 
@@ -75,8 +119,7 @@ The last three digits are the bank response code.
 | `4000 0000 0000 3220` | Approved after a 3DS challenge |
 | `4000 0000 0000 9999` | Gateway timeout, no callback sent |
 
-Any expiry in the future and any CVV work. The full list is on the Test Cards page and at
-`GET /_sandbox/cards`.
+Any expiry in the future and any CVV work. The full list is at `GET /_sandbox/cards`.
 
 ## Callbacks
 
@@ -97,8 +140,6 @@ docker run -p 8181:8181 --add-host=host.docker.internal:host-gateway \
   ghcr.io/martian56/epoint-sandbox
 ```
 
-Every attempt is on the Callbacks page with the payload, the signature, your response and timing.
-
 ## Signatures
 
 Epoint signs with `base64(sha1_raw(private_key + data + private_key))`. The digest has to be the
@@ -111,7 +152,7 @@ signature = base64.b64encode(
 ).decode()
 ```
 
-If a request is rejected, paste the pair into the Signature Tool page and it names the mistake.
+The Signature Tool page takes a failing pair and names the mistake.
 
 ## Endpoints
 
