@@ -17,6 +17,14 @@ https://epoint.az/api/1/request   ->   http://localhost:8181/api/1/request
 
 Every path under `/api/1/` matches production, so nothing else changes.
 
+If you would rather not hand-roll the signing and endpoints, there are open source SDKs (not affiliated with epoint):
+
+| Language | Package |
+|---|---|
+| Python | [`epoint`](https://github.com/martian56/epoint-python) |
+| JS / TS | [`@martian56/epoint`](https://github.com/martian56/epoint-js) |
+| Go | [`epoint-go`](https://github.com/martian56/epoint-go) |
+
 ![The sandbox dashboard, a copy of the epoint merchant cabinet](images/dashboard.png)
 
 | URL | |

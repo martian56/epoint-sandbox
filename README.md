@@ -17,6 +17,14 @@ https://epoint.az/api/1/request   ->   http://localhost:8181/api/1/request
 
 `/api/1/` altındakı bütün path-lər production ilə eynidir, ona görə başqa heç nə dəyişmir.
 
+İmzalama və endpoint-ləri özünüz yazmaq istəmirsinizsə, açıq mənbə SDK-lar var (epoint ilə bağlı deyil):
+
+| Dil | Paket |
+|---|---|
+| Python | [`epoint`](https://github.com/martian56/epoint-python) |
+| JS / TS | [`@martian56/epoint`](https://github.com/martian56/epoint-js) |
+| Go | [`epoint-go`](https://github.com/martian56/epoint-go) |
+
 ![Sandbox dashboard-u, epoint kabinetinin surəti](images/dashboard.png)
 
 | URL | |
