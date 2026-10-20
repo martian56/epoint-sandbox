@@ -129,6 +129,9 @@ DOCUMENTED_RESPONSE_FIELDS: dict[str, frozenset[str]] = {
     "/api/1/split-request": frozenset(
         {"message", "redirect_url", "status", "trace_id", "transaction"}
     ),
+    "/api/1/token/split-payment": frozenset(
+        {"message", "redirect_url", "status", "trace_id", "transaction"}
+    ),
     "/api/1/wallet/payment": frozenset(
         {"message", "redirect_url", "status", "trace_id", "transaction"}
     ),
@@ -145,6 +148,7 @@ SANCTIONED_EXTRAS: dict[str, frozenset[str]] = {
     "/api/1/pre-auth-request": frozenset({"redirect_url"}),
     "/api/1/request": frozenset({"redirect_url"}),
     "/api/1/split-request": frozenset({"redirect_url"}),
+    "/api/1/token/split-payment": frozenset({"redirect_url"}),
     "/api/1/token/widget": frozenset({"transaction", "widget_url"}),
     "/api/1/wallet/payment": frozenset({"redirect_url"}),
 }
@@ -172,5 +176,9 @@ UNVERIFIED: dict[str, str] = {
     "/api/1/reverse": (
         "message is documented but the production wording is unknown, so an empty "
         "string is returned to match the shape"
+    ),
+    "/api/1/token/split-payment": (
+        "the docs list no field for the Apple Pay or Google Pay token itself, so the "
+        "sandbox takes the split-request parameters and serves the same checkout page"
     ),
 }

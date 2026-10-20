@@ -44,6 +44,10 @@ PAGES = {
     "/b2b-payment/payment-status": "/api/1/b2b/payment/{order_id}",
 }
 
+MANUAL_DOCUMENTED = {
+    "/api/1/token/split-payment": {"status", "redirect_url", "transaction", "message", "trace_id"},
+}
+
 # Fields the sandbox adds deliberately. Anything else undocumented is a bug.
 SANCTIONED_EXTRAS = {
     "/api/1/request": {"redirect_url"},
@@ -58,6 +62,7 @@ SANCTIONED_EXTRAS = {
     "/api/1/card-registration": {"redirect_url"},
     "/api/1/card-registration-with-pay": {"redirect_url"},
     "/api/1/token/widget": {"widget_url", "transaction"},
+    "/api/1/token/split-payment": {"redirect_url"},
 }
 
 UNVERIFIED = {
@@ -82,6 +87,10 @@ UNVERIFIED = {
     ),
     "/api/1/b2b/payment": "not exercised against production",
     "/api/1/b2b/payment/{order_id}": "not exercised against production",
+    "/api/1/token/split-payment": (
+        "the docs list no field for the Apple Pay or Google Pay token itself, so the "
+        "sandbox takes the split-request parameters and serves the same checkout page"
+    ),
 }
 
 
@@ -115,6 +124,9 @@ def main() -> None:
         fields = response_fields(text[index : next_page if next_page > 0 else len(text)])
         if fields:
             documented.setdefault(api_path, set()).update(fields)
+
+    for api_path, fields in MANUAL_DOCUMENTED.items():
+        documented.setdefault(api_path, set()).update(fields)
 
     lines = [
         '"""Documented response fields, generated from the scraped epoint docs.',

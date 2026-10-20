@@ -313,6 +313,23 @@ def test_split_request_returns_every_documented_field(client, merchants):
     assert_documented_fields_present("/api/1/split-request", body)
 
 
+def test_token_split_payment_matches_its_contract(client, merchants):
+    body = call(
+        client,
+        merchants[0],
+        "/api/1/token/split-payment",
+        {
+            **PAYMENT,
+            "order_id": "p-token-split",
+            "split_user": merchants[1].public_key,
+            "split_amount": "10.00",
+        },
+    )
+    assert_within_contract("/api/1/token/split-payment", body)
+    assert_documented_fields_present("/api/1/token/split-payment", body)
+    assert "/api/1/token/split-payment" in UNVERIFIED
+
+
 def test_reverse_returns_every_documented_field(client, merchant):
     body = call(client, merchant, "/api/1/request", {**PAYMENT, "order_id": "p-rev"})
     pay_checkout(client, token_of(body))

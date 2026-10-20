@@ -125,7 +125,8 @@ The last three digits are the bank response code.
 | `4000 0000 0000 0102` | Suspected fraud (`102`) |
 | `4000 0000 0000 0209` | Stolen card (`209`) |
 | `4000 0000 0000 3220` | Approved after a 3DS challenge |
-| `4000 0000 0000 9999` | Gateway timeout, no callback sent |
+| `4000 0000 0000 9998` | Payment ends in status `error`, callback sent |
+| `4000 0000 0000 9999` | Gateway timeout, status `server_error`, no callback sent |
 
 Any expiry in the future and any CVV work. The full list is at `GET /_sandbox/cards`.
 
@@ -164,7 +165,7 @@ The Signature Tool page takes a failing pair and names the mistake.
 
 ## Endpoints
 
-All 30 documented endpoints are implemented.
+All 31 documented endpoints are implemented.
 
 | Area | Endpoints |
 |---|---|
@@ -177,7 +178,7 @@ All 30 documented endpoints are implemented.
 | Invoices | `create`, `update`, `view`, `list`, `send-sms`, `send-email` |
 | Installments | `get-installment-request`, `installment-request` |
 | Wallet | `wallet/status`, `wallet/payment` |
-| Token | `token/widget` |
+| Token | `token/widget`, `token/split-payment` |
 | B2B | `b2b/payment`, `b2b/payment/{order_id}` |
 | Health | `heartbeat` |
 
@@ -200,6 +201,13 @@ window.addEventListener('message', (event) => {
 
 The signed callback to your `result_url` still fires, and it is the one to settle the order on.
 Inside the sandbox widget you can pick which test card the wallet holds, so declines are reachable.
+
+`token/split-payment` splits an Apple Pay or Google Pay payment between two merchants. It takes the
+same parameters as `split-request` and returns the same `redirect_url`, which settles and splits the
+same way. The docs list no field for the wallet token itself, so the sandbox asks for none. It sits
+behind the same Apple Pay and Google Pay grant as `token/widget`.
+
+A transaction reaches `returned` through `reverse`, or as the transaction `refund-request` records.
 
 Balances are a real ledger: payments credit, commission and refunds debit, splits move between
 accounts. Invoice SMS and email are captured in the dashboard rather than delivered.

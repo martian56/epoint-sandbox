@@ -68,3 +68,10 @@ def test_every_documented_decline_keeps_its_own_code():
 
     assert len(codes) == len(declines), "decline cards collapsed onto the same code"
     assert "100" not in codes, "a card fell through to the generic decline"
+
+
+def test_error_card_flags_error_without_a_timeout():
+    outcome = magic_cards.resolve(magic_cards.ERROR_CARD)
+    assert outcome.error is True
+    assert outcome.timeout is False
+    assert outcome.approved is False

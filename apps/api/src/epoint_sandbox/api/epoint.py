@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 
-from epoint_sandbox.api.deps import SessionDep, SignedRequestDep
+from epoint_sandbox.api.deps import SessionDep, SignedRequest, SignedRequestDep
 from epoint_sandbox.api.errors import EpointError
 from epoint_sandbox.models import Card, Merchant, Transaction
 from epoint_sandbox.services import features, payments
@@ -82,11 +82,8 @@ async def checkout_redirect(
     return RedirectResponse(payments.checkout_url(transaction), status_code=303)
 
 
-@router.post("/split-request")
-async def split_request(
-    request: Request,
-    signed: SignedRequestDep,
-    session: SessionDep,
+def _split_payment(
+    request: Request, signed: SignedRequest, session: SessionDep, endpoint: str
 ) -> dict[str, Any]:
     signed.require("split_user", "split_amount")
     trace_id = _trace(request)
@@ -98,7 +95,7 @@ async def split_request(
         raise EpointError(f"Unknown split_user: {signed.get('split_user')}", status_code=403)
 
     transaction = payments.create_transaction(
-        session, signed, endpoint="split-request", trace_id=trace_id, allowed_currencies=AZN_ONLY
+        session, signed, endpoint=endpoint, trace_id=trace_id, allowed_currencies=AZN_ONLY
     )
     split_amount = payments.parse_amount(signed.get("split_amount"), "split_amount")
     if split_amount > transaction.amount:
@@ -109,6 +106,26 @@ async def split_request(
     session.flush()
 
     return _redirect_response(transaction, trace_id)
+
+
+@router.post("/split-request")
+async def split_request(
+    request: Request,
+    signed: SignedRequestDep,
+    session: SessionDep,
+) -> dict[str, Any]:
+    return _split_payment(request, signed, session, "split-request")
+
+
+@router.post("/token/split-payment")
+async def token_split_payment(
+    request: Request,
+    signed: SignedRequestDep,
+    session: SessionDep,
+) -> dict[str, Any]:
+    signed.require("amount", "currency", "language", "order_id", "split_user", "split_amount")
+    features.require(signed.merchant, features.TOKEN_PAYMENTS)
+    return _split_payment(request, signed, session, "token/split-payment")
 
 
 @router.post("/pre-auth-request")
