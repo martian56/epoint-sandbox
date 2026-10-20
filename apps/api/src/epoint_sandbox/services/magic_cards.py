@@ -9,6 +9,8 @@ from epoint_sandbox.services import bank_codes
 
 SUCCESS_CARD = "4111111111111111"
 TIMEOUT_CARD = "4000000000009999"
+ERROR_CARD = "4000000000009998"
+ERROR_MESSAGE = "An error occurred during payment"
 THREE_DS_CARD = "4000000000003220"
 
 DECLINE_PREFIX = "4000000000000"
@@ -21,6 +23,7 @@ class CardOutcome:
     message: str
     approved: bool
     timeout: bool = False
+    error: bool = False
     requires_3ds: bool = False
 
 
@@ -36,6 +39,9 @@ def resolve(number: str) -> CardOutcome:
 
     if digits == TIMEOUT_CARD:
         return CardOutcome("", "Gateway timeout, no callback sent", False, timeout=True)
+
+    if digits == ERROR_CARD:
+        return CardOutcome("", ERROR_MESSAGE, False, error=True)
 
     if digits == THREE_DS_CARD:
         return CardOutcome(
@@ -85,6 +91,14 @@ def catalogue() -> list[dict[str, str | bool]]:
             "code": bank_codes.APPROVED,
             "outcome": "Approved after a 3DS challenge",
             "approved": True,
+        }
+    )
+    entries.append(
+        {
+            "number": ERROR_CARD,
+            "code": "",
+            "outcome": "Payment ends in status error, callback sent",
+            "approved": False,
         }
     )
     entries.append(

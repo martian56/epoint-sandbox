@@ -140,6 +140,8 @@ def _settle(
 
     if outcome.timeout:
         transaction.status = TransactionStatus.SERVER_ERROR
+    elif outcome.error:
+        transaction.status = TransactionStatus.ERROR
     elif outcome.approved:
         transaction.status = TransactionStatus.SUCCESS
         transaction.rrn = ids.rrn()

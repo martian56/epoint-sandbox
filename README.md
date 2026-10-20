@@ -125,7 +125,8 @@ Son üç rəqəm bank cavab kodudur.
 | `4000 0000 0000 0102` | Fırıldaqçılıq şübhəsi (`102`) |
 | `4000 0000 0000 0209` | Oğurlanmış kart (`209`) |
 | `4000 0000 0000 3220` | 3DS təsdiqindən sonra uğurlu |
-| `4000 0000 0000 9999` | Gateway timeout, callback ümumiyyətlə gəlmir |
+| `4000 0000 0000 9998` | Ödəniş `error` statusu ilə bitir, callback gəlir |
+| `4000 0000 0000 9999` | Gateway timeout, status `server_error`, callback ümumiyyətlə gəlmir |
 
 Gələcək tarixli istənilən müddət və istənilən CVV işləyir. Tam siyahı: `GET /_sandbox/cards`.
 
@@ -164,7 +165,7 @@ Signature Tool səhifəsi işləməyən cütü götürüb səhvin nə olduğunu 
 
 ## Endpoint-lər
 
-Sənədləşdirilmiş 30 endpoint-in hamısı var.
+Sənədləşdirilmiş 31 endpoint-in hamısı var.
 
 | Sahə | Endpoint-lər |
 |---|---|
@@ -177,7 +178,7 @@ Sənədləşdirilmiş 30 endpoint-in hamısı var.
 | Invoice | `create`, `update`, `view`, `list`, `send-sms`, `send-email` |
 | Taksit | `get-installment-request`, `installment-request` |
 | Wallet | `wallet/status`, `wallet/payment` |
-| Token | `token/widget` |
+| Token | `token/widget`, `token/split-payment` |
 | B2B | `b2b/payment`, `b2b/payment/{order_id}` |
 | Health | `heartbeat` |
 
@@ -202,6 +203,14 @@ window.addEventListener('message', (event) => {
 `result_url` ünvanınıza gedən imzalanmış callback yenə də göndərilir və sifarişi məhz onunla
 bağlamaq lazımdır. Sandbox widget-inin içində wallet-dəki kartı seçə bilirsiniz, ona görə uğursuz
 halları da yoxlamaq mümkündür.
+
+`token/split-payment` Apple Pay və ya Google Pay ödənişini iki merchant arasında bölür. Parametrləri
+`split-request` ilə eynidir, eyni `redirect_url` qaytarır və ödəniş eyni qaydada bölünür. Sənədlərdə
+wallet token-i üçün sahə yoxdur, ona görə sandbox da onu istəmir. `token/widget` kimi Apple Pay və
+Google Pay icazəsi açıq olmalıdır.
+
+Əməliyyat `returned` statusuna `reverse` ilə keçir, `refund-request` də yazdığı əməliyyatı bu
+statusla saxlayır.
 
 Balanslar real tarixçədir: ödənişlər balansı artırır, komissiya və geri qaytarmalar azaldır, split
 isə hesablar arasında bölünür. Invoice SMS və email-ləri göndərilmir, dashboard-da saxlanılır.
