@@ -22,7 +22,7 @@ If you would rather not hand-roll the signing and endpoints, there are open sour
 | Language | Package |
 |---|---|
 | Python | [`epoint`](https://github.com/martian56/epoint-python) |
-| JS / TS | [`@martian56/epoint`](https://github.com/martian56/epoint-js) |
+| JS / TS | [`epoint-js`](https://github.com/martian56/epoint-js) |
 | Go | [`epoint-go`](https://github.com/martian56/epoint-go) |
 
 ![The sandbox dashboard, a copy of the epoint merchant cabinet](images/dashboard.png)
